@@ -3,49 +3,39 @@ PROJ_NAME = level_c
 
 BUILD_DIR   = build
 OBJ_DIR     = $(BUILD_DIR)/obj
-USER_SRC_DIR = src
-LIB_SRC_DIR  = lib/cli-lib/src
-INCLUDE_DIR = lib/cli-lib/include
+SRC_DIR     = src
 
-VPATH = $(USER_SRC_DIR) $(LIB_SRC_DIR)
+CFLAGS = -Wall -Wextra -O2 -std=c99
+LDFLAGS =
 
-# gcc where to find headers (.h files)
-CFLAGS = -Wall -g -std=c99 -I$(INCLUDE_DIR)
-# -lm links the math library (required by cli-lib's timer)
-LIBS = -lm
+# Flags e libs para raylib (ajuste conforme seu SO)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Darwin) # macOS
+    CFLAGS += -I/usr/local/include -I/opt/homebrew/include
+    LDFLAGS += -L/usr/local/lib -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+else # Linux
+    LDFLAGS += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+endif
 
-# Find all .c file *names* in both source directories
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
-USER_SRCS = $(notdir $(wildcard $(USER_SRC_DIR)/*.c))
-LIB_SRCS  = $(notdir $(wildcard $(LIB_SRC_DIR)/*.c))
-
-# Create the list of object files that will live in OBJ_DIR
-
-OBJ_FILES = $(USER_SRCS:%.c=$(OBJ_DIR)/%.o) $(LIB_SRCS:%.c=$(OBJ_DIR)/%.o)
-
-# Default rule
 all: $(BUILD_DIR)/$(PROJ_NAME)
-# Rule to create the final executable
-$(BUILD_DIR)/$(PROJ_NAME): $(OBJ_DIR) $(OBJ_FILES)
-	@echo "Linking executable: $@"
-	@$(CC) $(CFLAGS) -o $@ $(OBJ_FILES) $(LIBS)
-# Rule to create the build/obj directory
+
+$(BUILD_DIR)/$(PROJ_NAME): $(OBJ_DIR) $(OBJS)
+	@echo "Linking: $@"
+	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+
 $(OBJ_DIR):
-	@echo "Creating directory: $@"
 	@mkdir -p $(OBJ_DIR)
-# Rule to compile .c files into .o file
-# and this rule will compile it into the OBJ_DIR
-$(OBJ_DIR)/%.o: %.c
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "Compiling: $<"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up all built files
-
 clean:
-	@echo "Cleaning build files..."
+	@echo "Cleaning..."
 	@rm -rf $(BUILD_DIR)
-
-# Run the project
 
 run: all
 	@echo "Running $(PROJ_NAME)..."
