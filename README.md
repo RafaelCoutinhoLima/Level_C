@@ -14,8 +14,7 @@ para a disciplina de **Programação Imperativa Formativa (PIF)**.
 
 ## 👥 Equipe de Desenvolvimento
 
-| Integrante | Função Principal |
-|-------------|------------------|
+| Integrante 
 | **João Eduardo Azevedo** 
 | **Rafael Coutinho Lima** 
 | **Guilherme Tolentino Leitão De Melo** 
