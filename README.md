@@ -16,9 +16,9 @@ para a disciplina de **Programação Imperativa Formativa (PIF)**.
 
 | Integrante | Função Principal |
 |-------------|------------------|
-| **João Eduardo Azevedo** | Design de níveis, lógica de jogo e testes |
-| **Rafael Coutinho Lima** | Programação principal, física e integração Raylib |
-| **Guilherme Tolentino Leitão De Melo** | Sistema de menus, assets e suporte técnico |
+| **João Eduardo Azevedo** 
+| **Rafael Coutinho Lima** 
+| **Guilherme Tolentino Leitão De Melo** 
 
 ---
 
