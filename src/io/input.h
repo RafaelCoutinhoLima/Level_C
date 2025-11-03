@@ -2,9 +2,9 @@
 #define INPUT_H
 #include <stdbool.h>
 
-struct Player;
+struct InputState;
 
 bool input_init(void);
-void input_update_player(struct Player* p); // altera velocidade/flags conforme teclado
+void input_update_player(struct InputState* input); // preenche o estado de input
 
 #endif
