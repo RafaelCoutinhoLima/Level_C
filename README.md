@@ -1,27 +1,41 @@
-# Level C
+# 😈 Level C
+### *"Um remake 2D do 'Level Devil' (mas em C)"*
 
-Projeto da disciplina **Programação Imperativa Formativa (PIF)** para criar um remake 2D do jogo "Level Devil", escrito inteiramente em C e utilizando a `cli-lib` para renderização em terminal (ou janela gráfica).
+![Gameplay do Level C](fazer tutorial)
 
-**Equipe:**
-* **João**
-* **Rafael Coutinho Lima**
-* **Guilherme**
+**Level C** é um jogo de plataforma 2D do gênero *rage*, inspirado no notório **Level Devil**.  
+O objetivo é simples: chegar ao final da fase.  
+A dificuldade é... bom, você vai descobrir.
+
+O jogo foi desenvolvido em **C puro** utilizando a biblioteca gráfica [Raylib](https://www.raylib.com/)  
+para a disciplina de **Programação Imperativa Formativa (PIF)**.
 
 ---
 
-## 1. Dependências
+## 👥 Equipe de Desenvolvimento
 
-Para compilar e rodar este projeto, você precisará de:
-* `make`
-* Um compilador C (como `gcc` ou `clang`)
-* A biblioteca `cli-lib` (incluída como submódulo Git)
+| Integrante | Função Principal |
+|-------------|------------------|
+| **João Eduardo Azevedo** | Design de níveis, lógica de jogo e testes |
+| **Rafael Coutinho Lima** | Programação principal, física e integração Raylib |
+| **Guilherme Tolentino Leitão De Melo** | Sistema de menus, assets e suporte técnico |
 
-## 2. Como Compilar e Rodar
+---
 
-### Clonando o Repositório
+## 🛠️ Como Compilar e Rodar
 
-Como o projeto usa a `cli-lib` como um [submódulo Git](https://git-scm.com/book/en/v2/Git-Tools-Submodules), você **precisa** usar o comando `--recurse-submodules` ao clonar:
+### ✅ 1. Instale as Dependências (Raylib)
+
+#### 🔸 Linux (Ubuntu/Debian)
+Antes de seguir o guia oficial, tente o método mais simples:
 
 ```bash
-git clone --recurse-submodules [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
-cd Level_C
+sudo apt update
+
+# Instala as dependências que a Raylib precisa
+sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev 
+sudo apt install libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev 
+sudo apt install libxkbcommon-dev
+
+# Instala a biblioteca Raylib
+sudo apt install libraylib-dev
