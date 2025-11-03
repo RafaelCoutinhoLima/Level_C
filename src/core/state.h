@@ -19,7 +19,7 @@ typedef struct {
 
 void state_init_manager(void);
 void state_register(GameStateId id,GameState state);
-void state_chage(GameStateId next_id);
+void state_change(GameStateId next_id);
 
 void state_update(void);
 void state_draw(void);
