@@ -29,6 +29,7 @@ void play_screen_init(void) {
     gInput = (InputState){0};
     
     input_init();
+    physics_init(NULL);
 }
 
 void play_screen_update(float dt) {
@@ -36,7 +37,7 @@ void play_screen_update(float dt) {
 
     input_update_player(&gInput);
     player_apply_input(&gPlayer, &gInput, dt);
-    physics_update(&gPlayer, dt);
+    physics_update(&gPlayer, &gInput, dt);
 
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);

@@ -129,16 +129,17 @@ bool level_loader_load(const char* path, Level* out) {
     
     TraceLog(LOG_INFO, "[level_loader] OK %s (%dx%d) traps= %zu", path, width, height, out->trapSet.count);
     TraceLog(LOG_INFO, "[level_loader] spawn=(%.1f,%.1f) goal=(%.1f,%.1f)", out->spawn.x, out->spawn.y, out->goal.x, out->goal.y);
-    
+
     return true;
 }
 
-void level_loader_unload(struct Level* level) {
-    if (!level) return;
-    FreeLevel(level);
+void level_loader_unload(Level* level) {
+    if (!level)
+        return;
+    level_clear(level);
 }
 
-bool level_loader_from_id(int levelId, struct Level* out) {
+bool level_loader_from_id(int levelId, Level* out) {
     char path[256];
     snprintf(path, sizeof(path), "data/levels/level%d.txt", levelId);
     return level_loader_load(path, out);
