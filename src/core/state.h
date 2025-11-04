@@ -8,13 +8,13 @@ typedef enum{
     SCREEN_GAMEOVER,
 } GameStateId;
 // usa ponteiros para acessar as funções fica melhor
-//por que senão teria que usar if else no state.c pode causar 
+//por que senão teria que usar if else no state.c pode causar um bug
 //sem saber necessariamente qual ta usando
 typedef struct {
     void (*init)(void);
     void (*update)(void);
     void (*draw)(void);
-    void (*unloud)(void);
+    void (*unload)(void);
 } GameState;
 
 void state_init_manager(void);
@@ -23,6 +23,6 @@ void state_change(GameStateId next_id);
 
 void state_update(void);
 void state_draw(void);
-void state_shutdonw(void);
+void state_shutdown(void);
 
 #endif
