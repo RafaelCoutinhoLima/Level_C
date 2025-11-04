@@ -2,7 +2,9 @@
 #include "io/input.h"
 #include "gameplay/level.h"
 #include "gameplay/player.h"
+#include "gameplay/physics.h"
 #include "collisions/collision.h"
+
 #include <raylib.h>
 
 static Level gLevel;
@@ -35,15 +37,17 @@ void play_screen_update(float dt) {
     input_update_player(&gInput);
     player_apply_input(&gPlayer, &gInput, dt);
     physics_update(&gPlayer, dt);
-    player_update_hitbox(&gPlayer);
 
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
-    collisions_check_goal(&gPlayer, &gLevel, &gCol);
+    collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
 
     if (gCol.died) {
-        TraceLog(LOG_INFO, "[play] morreu -> reset level");
-        player_reset(&gPlayer, gLevel.spawn);
+        player_update_hitbox(&gPlayer);
+        gPlayer.isOnGround = gCol.onGround;
+
+            TraceLog(LOG_INFO, "[play] morreu -> reset level");
+            player_reset(&gPlayer, gLevel.spawn);
     }
     if (gCol.reachedGoal) {
         TraceLog(LOG_INFO, "[play] chegou no goal -> trocar de tela");
