@@ -45,7 +45,7 @@ void play_screen_update(float dt) {
 
     if (gCol.died) {
         player_update_hitbox(&gPlayer);
-        gPlayer.isOnGround = gCol.onGround;
+        gPlayer.isOnGround = gCol.hitGround;
 
             TraceLog(LOG_INFO, "[play] morreu -> reset level");
             player_reset(&gPlayer, gLevel.spawn);
