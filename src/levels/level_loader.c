@@ -1,44 +1,36 @@
 #include "level_loader.h"
+#include "gameplay/level.h"
+#include "gameplay/trap.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>   // para TraceLog, Vector2, etc.
-#include "gameplay/level.h"   // Level, Trap e afins (definidos pelo João)
 
 #define LINE_MAX 1024
 
 // Mapeia caracteres do arquivo para tiles (ajuste conforme seu projeto)
-static int TileFromChar(char c) {
+static TileType tile_from_char(char c) {
     switch (c) {
-        case '#': return 1; // sólido
-        case '.': return 0; // vazio
-        case 'S': return 0; // spawn (tile vazio)
-        case 'G': return 0; // goal  (tile vazio)
-        case 'T': return 0; // trap  (tile vazio, trap vai em lista)
-        default : return 0; // desconhecido vira vazio
+        case '#':
+            return 1; // sólido
+        case '.':
+            return 0; // vazio
+        case 'S':
+            return 0; // spawn (tile vazio)
+        case 'G':
+            return 0; // goal  (tile vazio)
+        case 'T':
+            return 0; // trap  (tile vazio, trap vai em lista)
+        default :
+            return 0; // desconhecido vira vazio
     }
 }
 
-static void LevelZero(struct Level* L) {
-    if (!L) return;
-    memset(L, 0, sizeof(*L));
-    L->tiles    = NULL;
-    L->traps    = NULL;
-    L->trapCount = 0;
-}
-
-static void FreeLevel(struct Level* L) {
-    if (!L) return;
-    if (L->tiles) free(L->tiles);
-    if (L->traps) free(L->traps);
-    L->tiles = NULL;
-    L->traps = NULL;
-    L->trapCount = 0;
-}
-
-bool level_loader_load(const char* path, struct Level* out) {
-    if (!path || !out) return false;
-    LevelZero(out);
+bool level_loader_load(const char* path, Level* out) {
+    if (!path || !out)
+        return false;
+    
+    level_init(out);
 
     FILE* f = fopen(path, "r");
     if (!f) {
@@ -52,44 +44,40 @@ bool level_loader_load(const char* path, struct Level* out) {
     // S = spawn, G = goal, T = trap, # = solido, . = vazio
     // Linhas iniciadas com ';' ou '#' como comentário são ignoradas fora da grade.
 
-    int width = 0, height = 0;
+    int width = 0;
+    int height = 0;
     char line[LINE_MAX];
 
     // Ler primeira linha com W H (pulando comentários e vazias)
     while (fgets(line, LINE_MAX, f)) {
         if (line[0] == ';' || line[0] == '#' || line[0] == '\n' || line[0] == '\r')
             continue;
-        if (sscanf(line, "%d %d", &width, &height) == 2) break;
+        if (sscanf(line, "%d %d", &width, &height) == 2)
+            break;
     }
 
-    if (width <= 0 || height <= 0) {
-        TraceLog(LOG_ERROR, "[level_loader] Dimensoes invalidas em %s", path);
+    if (width <= 0 || height <= 0 || width > LEVEL_MAX_WIDTH || height > LEVEL_MAX_HEIGHT) {
+        TraceLog(LOG_ERROR, "[level_loader] Dimensoes invalidas (%d x %d)", width, height, path);
         fclose(f);
         return false;
     }
 
-    int* tiles = (int*)calloc((size_t)width * (size_t)height, sizeof(int));
-    if (!tiles) {
-        TraceLog(LOG_ERROR, "[level_loader] Falha de memoria (tiles)");
-        fclose(f);
-        return false;
-    }
+    out->width = width;
+    out->height = height;
 
-    // Vamos armazenar traps numa lista temporária dinâmica
-    typedef struct { int x, y; int type; } TrapTmp;
-    TrapTmp* tmp = NULL;
-    int tmpCount = 0, tmpCap = 0;
+    const float tileSize = out->tileSize > 0.0f ? out->tileSize : 32.0f;    
 
-    Vector2 spawn = (Vector2){0,0};
-    Vector2 goal  = (Vector2){0,0};
-    bool hasSpawn = false, hasGoal = false;
+    Vector2 spawn = (Vector2){0};
+    Rectangle goal  = (Rectangle){0};
+    bool hasSpawn = false;
+    bool hasGoal = false;
 
     int y = 0;
     while (y < height && fgets(line, LINE_MAX, f)) {
         // Ignora linhas de comentário vazias, MAS aqui estamos dentro da grade,
         // então se a linha for curta, tratamos como vazia.
-        if (line[0] == ';' || line[0] == '#') continue;
-
+        if (line[0] == ';' || line[0] == '#') 
+            continue;
         // Garantir que a linha tem ao menos width caracteres úteis
         int len = (int)strlen(line);
         // remover \r\n
@@ -98,31 +86,26 @@ bool level_loader_load(const char* path, struct Level* out) {
         }
 
         for (int x = 0; x < width; x++) {
-            char c = (x < len) ? line[x] : '.';
-            int tile = TileFromChar(c);
-            tiles[y*width + x] = tile;
+            const char c = (x < len) ? line[x] : '.';
+            out->tiles[x][y] = tile_from_char(c);
 
             if (c == 'S') {
-                spawn = (Vector2){ (float)x, (float)y };
+                spawn = (Vector2){(x + 0.5f) * tileSize,(y + 1.0f) * tileSize};
                 hasSpawn = true;
             } else if (c == 'G') {
-                goal = (Vector2){ (float)x, (float)y };
+                goal = (Rectangle){x * tileSize, y * tileSize, tileSize, tileSize};
                 hasGoal = true;
             } else if (c == 'T') {
                 // push back
-                if (tmpCount == tmpCap) {
-                    tmpCap = tmpCap ? tmpCap*2 : 8;
-                    TrapTmp* nt = (TrapTmp*)realloc(tmp, (size_t)tmpCap * sizeof(TrapTmp));
-                    if (!nt) {
-                        TraceLog(LOG_ERROR, "[level_loader] Falha de memoria (traps)");
-                        free(tiles);
-                        free(tmp);
-                        fclose(f);
-                        return false;
-                    }
-                    tmp = nt;
+                Trap trap = {0};
+                trap.position = (Vector2){(x + 0.5f) * tileSize, (y + 1.0f) * tileSize};
+                trap.hitbox = (Rectangle){x * tileSize, y * tileSize, tileSize, tileSize};
+                trap.type = TRAP_TYPE_SPIKE;
+                trap.active = true;
+
+                if (!trap_set_add(&out->trapSet, trap)){
+                    TraceLog(LOG_WARNING, "[level_loader] Trap overflow descartando trap (%d,%d)", x, y);
                 }
-                tmp[tmpCount++] = (TrapTmp){ x, y, 0 }; // type 0 generico por enquanto
             }
         }
         y++;
@@ -131,44 +114,22 @@ bool level_loader_load(const char* path, struct Level* out) {
 
     if (y < height) {
         TraceLog(LOG_ERROR, "[level_loader] Arquivo terminou antes da grade (%d/%d linhas)", y, height);
-        free(tiles);
-        free(tmp);
+        level_clear(out);
         return false;
     }
 
-    // Copia traps temporárias para Level->traps (struct Trap do gameplay)
-    Trap* traps = NULL;
-    if (tmpCount > 0) {
-        traps = (Trap*)calloc((size_t)tmpCount, sizeof(Trap));
-        if (!traps) {
-            TraceLog(LOG_ERROR, "[level_loader] Falha de memoria (Level->traps)");
-            free(tiles);
-            free(tmp);
-            return false;
-        }
-        for (int i = 0; i < tmpCount; i++) {
-            traps[i].pos = (Vector2){ (float)tmp[i].x, (float)tmp[i].y };
-            traps[i].type = tmp[i].type;
-            // ajuste: se Trap tiver bbox, defina aqui (ex: traps[i].hitbox = (Rectangle){...})
-        }
-    }
-    free(tmp);
+    out->spawn = spawn;
+    out->goal = goal;
 
-    // Preenche Level
-    out->width  = width;
-    out->height = height;
-    out->tiles  = tiles;
-    out->spawn  = spawn;
-    out->goal   = goal;
-    out->traps      = traps;
-    out->trapCount  = tmpCount;
+    if (!hasSpawn)
+        TraceLog(LOG_WARNING, "[level_loader] Não encontrou spawn em %s", path);
 
-    if (!hasSpawn) TraceLog(LOG_WARNING, "[level_loader] Nao encontrou S (spawn) em %s", path);
-    if (!hasGoal)  TraceLog(LOG_WARNING, "[level_loader] Nao encontrou G (goal) em %s", path);
-
-    TraceLog(LOG_INFO, "[level_loader] OK %s  (%dx%d) traps=%d", path, width, height, tmpCount);
-    TraceLog(LOG_INFO, "[level_loader] spawn=(%.0f,%.0f) goal=(%.0f,%.0f)",
-             out->spawn.x, out->spawn.y, out->goal.x, out->goal.y);
+    if (!hasGoal)
+        TraceLog(LOG_WARNING, "[level_loader] Não encontrou goal em %s", path);
+    
+    TraceLog(LOG_INFO, "[level_loader] OK %s (%dx%d) traps= %zu", path, width, height, out->trapSet.count);
+    TraceLog(LOG_INFO, "[level_loader] spawn=(%.1f,%.1f) goal=(%.1f,%.1f)", out->spawn.x, out->spawn.y, out->goal.x, out->goal.y);
+    
     return true;
 }
 
