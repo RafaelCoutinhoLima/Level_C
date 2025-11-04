@@ -4,6 +4,8 @@
 #include "gameplay/player.h"
 #include "gameplay/physics.h"
 #include "collisions/collision.h"
+#include "gameplay/trap.h"
+#include "core/state.h"
 
 #include <raylib.h>
 
@@ -44,24 +46,35 @@ void play_screen_update(float dt) {
     collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
 
     if (gCol.died) {
-        player_update_hitbox(&gPlayer);
-        gPlayer.isOnGround = gCol.hitGround;
-
-            TraceLog(LOG_INFO, "[play] morreu -> reset level");
-            player_reset(&gPlayer, gLevel.spawn);
+        TraceLog(LOG_INFO, "[play] morreu -> reset level");
+        player_reset(&gPlayer, gLevel.spawn);
     }
     if (gCol.reachedGoal) {
         TraceLog(LOG_INFO, "[play] chegou no goal -> trocar de tela");
-        // state_change(SCREEN_GAMEOVER); Rafa
+        state_change(SCREEN_GAMEOVER);
     }
 }
 
 void play_screen_draw(void) {
-    // Debug overlay mínimo:
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    for (size_t i =0; i<gLevel.trapSet.count; i++){
+        const Trap* trap = trap_set_get(&gLevel.trapSet, i);
+        if (trap && trap->active){
+            DrawRectangleLinesEx(trap->hitbox, 2.0f, RED);
+        }
+    }
+
+    Rectangle playerRect = player_get_bounds(&gPlayer);
+    DrawRectangleRec(playerRect, BLACK);
+
     DrawText(TextFormat("pos(%.1f,%.1f) vel(%.1f,%.1f) traps=%zu",
         gPlayer.position.x, gPlayer.position.y,
         gPlayer.velocity.x, gPlayer.velocity.y,
         gLevel.trapSet.count), 8, 8, 16, WHITE);
+    
+    EndDrawing();
 }
 
 void play_screen_unload(void) {
