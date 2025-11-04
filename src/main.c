@@ -14,7 +14,7 @@ int main(void){
 
     while (!WindowShouldClose()){
         float dt = GetFrameTime();
-        play_screen_update();
+        play_screen_update(dt);
         play_screen_draw();
 
     }

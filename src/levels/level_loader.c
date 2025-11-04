@@ -76,7 +76,7 @@ bool level_loader_load(const char* path, Level* out) {
     while (y < height && fgets(line, LINE_MAX, f)) {
         // Ignora linhas de comentário vazias, MAS aqui estamos dentro da grade,
         // então se a linha for curta, tratamos como vazia.
-        if (line[0] == ';' || line[0] == '#') 
+        if (line[0] == ';') 
             continue;
         // Garantir que a linha tem ao menos width caracteres úteis
         int len = (int)strlen(line);
@@ -87,7 +87,7 @@ bool level_loader_load(const char* path, Level* out) {
 
         for (int x = 0; x < width; x++) {
             const char c = (x < len) ? line[x] : '.';
-            out->tiles[x][y] = tile_from_char(c);
+            out->tiles[y][x] = tile_from_char(c);
 
             if (c == 'S') {
                 spawn = (Vector2){(x + 0.5f) * tileSize,(y + 1.0f) * tileSize};
