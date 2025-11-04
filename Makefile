@@ -5,7 +5,7 @@ BUILD_DIR   = build
 OBJ_DIR     = $(BUILD_DIR)/obj
 SRC_DIR     = src
 
-CFLAGS = -Wall -Wextra -O2 -std=c99
+CFLAGS = -Wall -Wextra -O2 -std=c99 -I$(SRC_DIR)
 LDFLAGS =
 
 # Flags e libs para raylib (ajuste conforme seu SO)
@@ -17,20 +17,19 @@ else # Linux
     LDFLAGS += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 endif
 
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS := $(shell find $(SRC_DIR) -name '*.c')
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
 all: $(BUILD_DIR)/$(PROJ_NAME)
 
-$(BUILD_DIR)/$(PROJ_NAME): $(OBJ_DIR) $(OBJS)
+$(BUILD_DIR)/$(PROJ_NAME): $(OBJS)
 	@echo "Linking: $@"
+	@mkdir -p $(BUILD_DIR)
 	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
-
-$(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "Compiling: $<"
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

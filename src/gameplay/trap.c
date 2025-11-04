@@ -1,4 +1,4 @@
-#include <trap.h>
+#include "trap.h"
 #include <raylib.h>
 
 void trap_set_init(TrapSet* set){
