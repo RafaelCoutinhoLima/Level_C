@@ -14,7 +14,7 @@ void trap_set_init(TrapSet* set){
 
 bool trap_set_add(TrapSet* set, Trap trap){
     if (!set)
-        return;
+        return false;
     
     if (set->count >= TRAPSET_MAX_TRAPS){
         TraceLog(LOG_WARNING, "[TrapSet] overflox (max=%d)", TRAPSET_MAX_TRAPS);
