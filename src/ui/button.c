@@ -33,8 +33,8 @@ bool UpdateButton(Button *button){
         if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)){
             clickedThisFrame=true;//confirmar o click
         }
-        return clickedThisFrame;
     }
+    return clickedThisFrame;
 }
 void DrawButton(Button button){
     Color color=button.baseColor;
