@@ -1,5 +1,5 @@
-#ifndef HOME_SCREEN_H
-#define HOME_SCREEN_H
+#pragma once
+#include "core/state.h"
 
 void home_screen_init(void);
 
@@ -9,4 +9,4 @@ void home_screen_draw(void);
 
 void home_screen_unload(void);
 
-#endif
+GameState home_screen_state(void);

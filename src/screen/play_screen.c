@@ -8,6 +8,7 @@
 #include "collisions/collision.h"
 #include "gameplay/trap.h"
 #include "core/state.h"
+#include "ui/button.h"
 
 #include <raylib.h>
 
@@ -15,6 +16,7 @@ static Level gLevel;
 static Player gPlayer;
 static CollisionResult gCol;
 static InputState gInput;
+static Button btnBackToMenu;
 
 static void draw_level_tiles(const Level* level);
 static void draw_traps(const TrapSet* trapSet);
@@ -39,6 +41,9 @@ void play_screen_init(void) {
     
     input_init();
     physics_init(NULL);
+
+    EnableCursor();
+    btnBackToMenu = CreateButton(-1, GetScreenHeight() - 70, 220, 45, "Voltar ao menu");
 }
 
 void play_screen_update(float dt) {
@@ -61,19 +66,21 @@ void play_screen_update(float dt) {
         TraceLog(LOG_INFO, "[play] chegou no goal -> trocar de tela");
         state_change(SCREEN_GAMEOVER);
     }
-    if (IsKeyPressed(KEY_ESCAPE)){
+    if (UpdateButton(&btnBackToMenu)){
+        TraceLog(LOG_INFO, "[Play] botão Voltar acionado");
         state_change(SCREEN_MENU);
     }
 }
 
 void play_screen_draw(void) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
 
+    ClearBackground(RAYWHITE);
     draw_level_tiles(&gLevel);
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
     draw_hud();
+    DrawButton(btnBackToMenu);
 
     EndDrawing();
 }
@@ -127,4 +134,13 @@ static void draw_player(const Player* player){
 static void draw_hud(void){
     DrawText(TextFormat("pos(%.1f, %.1f) vel(%.1f, %.1f) traps=%zu", gPlayer.position.x, gPlayer.position.y, gPlayer.velocity.x, gPlayer.velocity.y, gLevel.trapSet.count), 12, 12, 18, LIGHTGRAY);
     DrawText("ESC: voltar ao menu", 12, 38, 16, LIGHTGRAY);
+}
+
+GameState play_screen_state(void){
+    return (GameState){
+        .init = play_screen_init,
+        .update = play_screen_update,
+        .draw = play_screen_draw,
+        .unload = play_screen_unload,
+    };
 }

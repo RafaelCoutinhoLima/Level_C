@@ -12,7 +12,7 @@ typedef enum{
 //sem saber necessariamente qual ta usando
 typedef struct {
     void (*init)(void);
-    void (*update)(void);
+    void (*update)(float dt);
     void (*draw)(void);
     void (*unload)(void);
 } GameState;
@@ -21,7 +21,7 @@ void state_init_manager(void);
 void state_register(GameStateId id,GameState state);
 void state_change(GameStateId next_id);
 
-void state_update(void);
+void state_update(float dt);
 void state_draw(void);
 void state_shutdown(void);
 

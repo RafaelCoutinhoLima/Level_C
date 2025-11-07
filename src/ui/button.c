@@ -21,20 +21,26 @@ Button CreateButton(float x,float y,float width,float height,const char *text){
 }
 bool UpdateButton(Button *button){
     Vector2 mousePoint=GetMousePosition();
-    button->hovered=false;
-    button->clicked=false;
-    //resetando o botão
-    bool clickedThisFrame=false;
-    if(CheckCollisionPointRec(mousePoint,button->bounds)){
-        button->hovered=true;
-        if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)){
-            button->clicked=true;//feedback se foi pressionado        
-        }
-        if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)){
-            clickedThisFrame=true;//confirmar o click
+    bool hovered = CheckCollisionPointRec(mousePoint, button->bounds);
+    bool fire = false;
+
+    if (hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        button->clicked = true;
+    }
+    
+    if (button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)){
+        button->clicked = false;
+        if (hovered){
+            fire = true;
         }
     }
-    return clickedThisFrame;
+
+    if (!hovered && !IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+        button->clicked = false;
+    }
+
+    button->hovered = hovered;
+    return fire;
 }
 void DrawButton(Button button){
     Color color=button.baseColor;

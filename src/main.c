@@ -1,6 +1,10 @@
 #include <raylib.h>
 
 #include "screen/play_screen.h"
+#include "screen/menu_screen.h"
+#include "screen/home_screen.h"
+#include "screen/gameover_screen.h"
+#include "core/state.h"
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
@@ -10,16 +14,23 @@ int main(void){
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
-    play_screen_init();
+    state_init_manager();
+
+    state_register(SCREEN_HOME, home_screen_state());
+    state_register(SCREEN_MENU, menu_screen_state());
+    state_register(SCREEN_PLAY, play_screen_state());
+    state_register(SCREEN_GAMEOVER, gameover_screen_state());
+
+    state_change(SCREEN_HOME);
 
     while (!WindowShouldClose()){
         float dt = GetFrameTime();
-        play_screen_update(dt);
-        play_screen_draw();
+        state_update(dt);
+        state_draw();
+
 
     }
-
-    play_screen_unload();
+    state_shutdown();
     CloseWindow();
     return 0;
 }

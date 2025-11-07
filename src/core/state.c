@@ -15,7 +15,7 @@ static GameStateId g_next_state_id=-1;
 //motivo    
 static GameStateId g_current_state_id=-1;
 
-void  state_init_manager(void){
+void state_init_manager(void){
     //zerar os ponteiros da função para garantir que n tenha lixo
     for (int i=0;i<MAX_STATES;i++){
         g_states[i]=(GameState){NULL ,NULL,NULL,NULL};
@@ -28,10 +28,15 @@ void  state_init_manager(void){
 }
 void state_change(GameStateId next_id){
     //validação do id como se fosse uma flag
-    if (next_id<MAX_STATES){
-        //faz com que o next state id receba a tela atual
-        g_next_state_id=next_id;
+    if (next_id < 0 || next_id>= MAX_STATES){
+        TraceLog(LOG_ERROR, "state_change: id inválido (%d).", next_id);
+        return;
     }
+    if (g_states[next_id].init == NULL && g_states[next_id].update == NULL && g_states[next_id].draw == NULL && g_states[next_id].unload == NULL){
+        TraceLog(LOG_ERROR, "state_change: estado %d não foi registrado.", next_id);
+        return;
+    }
+    g_next_state_id = next_id;
 }
 
 static void do_state_change(void){
@@ -58,12 +63,12 @@ static void do_state_change(void){
     }
 }
 
-void state_update(void){
+void state_update(float dt){
     //antes de dar o update chamo para ver se vai trocar de tela
     do_state_change();
     //fazer o update agora g_current já ta na tela certa
     if (g_current_state!=NULL && g_current_state->update!=NULL){
-        g_current_state->update();
+        g_current_state->update(dt);
     }
 }
 void state_draw(void){
@@ -78,4 +83,14 @@ void state_shutdown(void){
         g_current_state->unload();
     }
     TraceLog(LOG_INFO,"State Manager finalizado");
+}
+
+void state_register(GameStateId id, GameState state){
+    if (id < 0 || id>= MAX_STATES){
+        TraceLog(LOG_ERROR, "Tentativa de registrar estado inválido (%d).", id);
+        return;
+    }
+
+    g_states[id] = state;
+    TraceLog(LOG_INFO, "Estado %d registrado (init=%p, update=%p, draw=%p, unload=%p)", id, (void *)state.init, (void *)state.update, (void *)state.draw, (void *)state.unload);
 }
