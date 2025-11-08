@@ -5,6 +5,7 @@ typedef enum{
     STATE_ID_NONE=-1,
     SCREEN_HOME,
     SCREEN_MENU,
+    SCREEN_MAP,
     SCREEN_PLAY,
     SCREEN_GAMEOVER,
 } GameStateId;

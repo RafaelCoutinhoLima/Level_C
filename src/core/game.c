@@ -8,6 +8,7 @@
 #include"screen/menu_screen.h"
 #include"screen/home_screen.h"
 #include"screen/gameover_screen.h"
+#include "screen/map_screen.h"
 
 //constante para o jogo a janela
 #define SCREEN_WIDTH 1280
@@ -41,9 +42,10 @@ bool game_init(void){
     //mudei a logica da main para aqui fica mais clean a main
     state_register(SCREEN_HOME,home_screen_state());
     state_register(SCREEN_MENU,menu_screen_state());
+    state_register(SCREEN_MAP,map_screen_state());
     state_register(SCREEN_PLAY,play_screen_state());
     state_register(SCREEN_GAMEOVER,gameover_screen_state());
-
+    
     state_change(SCREEN_HOME);
     TraceLog(LOG_INFO,"Jogo inicializado em Janela Maximizada");
     return true;

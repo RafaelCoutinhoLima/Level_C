@@ -16,7 +16,7 @@ void menu_screen_update(float dt){
     (void)dt;
 
     if (UpdateButton(&btnPlay)){
-        state_change(SCREEN_PLAY);
+        state_change(SCREEN_MAP);
     }else if (UpdateButton(&btnGameOver)){
         state_change(SCREEN_GAMEOVER);
     }
