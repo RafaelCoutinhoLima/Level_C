@@ -14,7 +14,7 @@ void gameover_screen_update(float dt){
     (void)dt;
 
     if(UpdateButton(&btnBackToMenu)){
-        state_change(SCREEN_MENU);
+        state_change(SCREEN_MAP);
     }
 }
 
