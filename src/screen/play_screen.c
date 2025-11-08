@@ -9,8 +9,9 @@
 #include "gameplay/trap.h"
 #include "core/state.h"
 #include "ui/button.h"
-
+#include "render/draw_utils.h"
 #include <raylib.h>
+
 
 static Level gLevel;
 static Player gPlayer;
@@ -18,10 +19,6 @@ static CollisionResult gCol;
 static InputState gInput;
 static Button btnBackToMenu;
 
-static void draw_level_tiles(const Level* level);
-static void draw_traps(const TrapSet* trapSet);
-static void draw_player(const Player* player);
-static void draw_hud(void);
 
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
@@ -73,65 +70,18 @@ void play_screen_update(float dt) {
 }
 
 void play_screen_draw(void) {
-
     ClearBackground(RAYWHITE);
+    
     draw_level_tiles(&gLevel);
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
-    draw_hud();
+    draw_hud(&gPlayer,&gLevel);
     DrawButton(btnBackToMenu);
 
 }
 
 void play_screen_unload(void) {
     level_loader_unload(&gLevel);
-}
-
-static void draw_level_tiles(const Level* level){
-    if (!level)
-        return;
-
-    for (int y =0; y<level->height; y++){
-        for (int x=0; x<level->width; x++){
-            if (!level_is_tile_solid(level, x, y))
-                continue;
-
-            Rectangle tileRect = level_tile_bounds(level, x, y);
-            DrawRectangleRec(tileRect, (Color){60, 200, 80, 180});
-        }
-    }
-    DrawRectangleRec(level->goal, (Color){60, 200, 80, 180});
-}
-
-static void draw_traps(const TrapSet* trapSet){
-    if (!trapSet)
-        return;
-
-    for (size_t i =0; i<trapSet->count; i++){
-        const Trap* trap = trap_set_get(trapSet, i);
-        if (!trap || !trap->active)
-            continue;
-        
-        DrawRectangleRec(trap->hitbox, (Color){210, 40, 40, 220});
-        DrawRectangleLinesEx(trap->hitbox, 1.5f, RED);
-    }
-}
-
-static void draw_player(const Player* player){
-    if (!player)
-        return;
-
-    Rectangle bounds = player_get_bounds(player);
-    DrawRectangleRec(bounds, (Color){20, 20, 20, 255});
-
-    if (!player->isAlive){
-        DrawRectangleLinesEx(bounds, 2.0f, RED);
-    }
-}
-
-static void draw_hud(void){
-    DrawText(TextFormat("pos(%.1f, %.1f) vel(%.1f, %.1f) traps=%zu", gPlayer.position.x, gPlayer.position.y, gPlayer.velocity.x, gPlayer.velocity.y, gLevel.trapSet.count), 12, 12, 18, LIGHTGRAY);
-    DrawText("ESC: voltar ao menu", 12, 38, 16, LIGHTGRAY);
 }
 
 GameState play_screen_state(void){

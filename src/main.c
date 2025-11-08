@@ -1,36 +1,24 @@
-#include <raylib.h>
+#include "core/game.h" // <--- O único include que ele precisa
+#include <stdlib.h> // Para EXIT_SUCCESS / EXIT_FAILURE
+#include <raylib.h> // Para TraceLog, LOG_FATAL (opcional mas bom)
 
-#include "screen/play_screen.h"
-#include "screen/menu_screen.h"
-#include "screen/home_screen.h"
-#include "screen/gameover_screen.h"
-#include "core/state.h"
-
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
-#define WINDOW_TITLE "Level C"
-
-int main(void){
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-    SetTargetFPS(60);
-
-    state_init_manager();
-
-    state_register(SCREEN_HOME, home_screen_state());
-    state_register(SCREEN_MENU, menu_screen_state());
-    state_register(SCREEN_PLAY, play_screen_state());
-    state_register(SCREEN_GAMEOVER, gameover_screen_state());
-
-    state_change(SCREEN_HOME);
-
-    while (!WindowShouldClose()){
-        float dt = GetFrameTime();
-        state_update(dt);
-        state_draw();
-
-
+int main(void) {
+    
+    // 1Tenta inicializar o jogo
+    // (game_init() agora faz TUDO: InitWindow, state_init, state_register)
+    if (!game_init()) {
+        TraceLog(LOG_FATAL, "Falha ao inicializar o jogo.");
+        game_shutdown(); // Tenta fechar o que quer que tenha sido aberto
+        return EXIT_FAILURE;
     }
-    state_shutdown();
-    CloseWindow();
-    return 0;
+
+    //Roda o loop principal do jogo
+    // (game_loop() agora tem o "while", state_update, Begin/EndDrawing, state_draw)
+    game_loop();
+
+    //Desliga o jogo
+    // (game_shutdown() agora faz o state_shutdown e CloseWindow)
+    game_shutdown();
+
+    return EXIT_SUCCESS;
 }

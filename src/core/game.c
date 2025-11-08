@@ -20,7 +20,7 @@ bool game_init(void){
     // A janela será iniciada com o tamanho máximo da área de trabalho,
     //e deixa uma janela aberta
     // mantendo a barra de tarefas visível.
-    SetWindowState(FLAG_WINDOW_MAXIMIZED);
+    SetConfigFlags(FLAG_WINDOW_MAXIMIZED);
 
     //incializar a janela com a engine do raylib
     //com as resoluções screen_width e height
