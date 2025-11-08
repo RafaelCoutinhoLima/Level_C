@@ -10,10 +10,10 @@ static GameState g_states[MAX_STATES];
 static GameState *g_current_state = NULL;
 //para passar para a proxima tela usa -1 
 //pq n tem nenhuma tela negativa é um valor inicial
-static GameStateId g_next_state_id=-1;
-//para salvar o id da tela atual -1 pelo mesmo 
+static GameStateId g_next_state_id=STATE_ID_NONE;
+//para salvar o id da tela atual -1 que é o state none pelo mesmo 
 //motivo    
-static GameStateId g_current_state_id=-1;
+static GameStateId g_current_state_id=STATE_ID_NONE;
 
 void state_init_manager(void){
     //zerar os ponteiros da função para garantir que n tenha lixo
@@ -21,8 +21,8 @@ void state_init_manager(void){
         g_states[i]=(GameState){NULL ,NULL,NULL,NULL};
     }
     g_current_state=NULL;
-    g_next_state_id=-1;
-    g_current_state_id=-1;
+    g_next_state_id=STATE_ID_NONE;
+    g_current_state_id=STATE_ID_NONE;
 
     TraceLog(LOG_INFO,"State Manager inicializado.");
 }
@@ -41,7 +41,7 @@ void state_change(GameStateId next_id){
 
 static void do_state_change(void){
     //faz uma verificação se a flag não mudou ou seja a tela 
-    if (g_next_state_id==-1){
+    if (g_next_state_id==STATE_ID_NONE){
         return;
     }
     if (g_current_state!=NULL && g_current_state->unload!=NULL){
@@ -50,8 +50,8 @@ static void do_state_change(void){
     }
     g_current_state_id=g_next_state_id;
     g_current_state=&g_states[g_current_state_id];
-    g_next_state_id=-1;
-    //faz o swap das telas e atualiza a proxima para -1
+    g_next_state_id=STATE_ID_NONE;
+    //faz o swap das telas e atualiza a proxima para -1 que é o state none
 
 
     //inicializar a nova tela e verifica se ela tem init

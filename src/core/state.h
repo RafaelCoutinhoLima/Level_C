@@ -2,6 +2,7 @@
 #define STATE_H 
 //para enumerar as telas do jogo o estado dele
 typedef enum{
+    STATE_ID_NONE=-1,
     SCREEN_HOME,
     SCREEN_MENU,
     SCREEN_PLAY,

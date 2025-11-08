@@ -24,7 +24,6 @@ void home_screen_update(float dt){
     }
 }
 void home_screen_draw(void){
-    BeginDrawing();
     //limpa a tela com um cor de fundo azul escuro
     ClearBackground((Color){20, 20, 30, 255});
 
@@ -34,8 +33,6 @@ void home_screen_draw(void){
 
     DrawText(title,(GetScreenWidth()-textWidth)/2, 150, fontsize, WHITE);
     DrawButton(btnGoToMenu);
-
-    EndDrawing();
 }
 void home_screen_unload(void){
     TraceLog(LOG_INFO,"[Home] unload");

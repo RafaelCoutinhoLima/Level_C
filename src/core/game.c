@@ -3,18 +3,19 @@
 #include <raylib.h>
 #include <stdbool.h>
 
-//constante para o jogo a janela
+//mudei da main para ca os includes 
+#include"screen/play_screen.h"
+#include"screen/menu_screen.h"
+#include"screen/home_screen.h"
+#include"screen/gameover_screen.h"
 
+//constante para o jogo a janela
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define GAME_TITLE "Level C Game"
 #define TARGET_FPS 60
 
 bool game_init(void){
-    //iniciar a tela dependendo do tamanho da tela
-    int monitor =GetCurrentMonitor();
-    int full_width=GetMonitorWidth(monitor);
-    int full_height=GetMonitorHeight(monitor); 
     //Configura a flag de Janela Maximizada ANTES de iniciar a janela
     // A janela será iniciada com o tamanho máximo da área de trabalho,
     //e deixa uma janela aberta
@@ -37,6 +38,31 @@ bool game_init(void){
     //iniciar o estado do jogo se ta no menu na home 
     //essas coisas
     state_init_manager();
+    //mudei a logica da main para aqui fica mais clean a main
+    state_register(SCREEN_HOME,home_screen_state());
+    state_register(SCREEN_MENU,menu_screen_state());
+    state_register(SCREEN_PLAY,play_screen_state());
+    state_register(SCREEN_GAMEOVER,gameover_screen_state());
+
+    state_change(SCREEN_HOME);
     TraceLog(LOG_INFO,"Jogo inicializado em Janela Maximizada");
     return true;
+}
+void game_loop(void){
+    while(!WindowShouldClose()){
+        float dt = GetFrameTime();
+        state_update(dt);
+
+        BeginDrawing();
+        //Para limpar a tela
+        ClearBackground(RAYWHITE);
+
+        state_draw();
+        EndDrawing();
+    }
+}
+void game_shutdown(void){
+    state_shutdown();
+    CloseWindow();
+    TraceLog(LOG_INFO,"jogo finalizado");
 }

@@ -19,7 +19,6 @@ void gameover_screen_update(float dt){
 }
 
 void gameover_screen_draw(void){
-    BeginDrawing();
 
     ClearBackground((Color){32, 0, 0, 255});
 
@@ -29,8 +28,6 @@ void gameover_screen_draw(void){
 
     DrawText(title, (GetScreenWidth() - textWidth) / 2, 140, fontSize, RED);
     DrawButton(btnBackToMenu);
-
-    EndDrawing();
 }
 
 void gameover_screen_unload(void){

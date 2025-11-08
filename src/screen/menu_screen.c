@@ -23,7 +23,6 @@ void menu_screen_update(float dt){
 }
 
 void menu_screen_draw(void){
-    BeginDrawing();
 
     ClearBackground((Color){18, 18, 26, 255});
 
@@ -35,7 +34,6 @@ void menu_screen_draw(void){
     DrawButton(btnPlay);
     DrawButton(btnGameOver);
 
-    EndDrawing();
 }
 
 void menu_screen_unload(void){

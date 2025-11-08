@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "gameover_screen.h": "c"
+        "gameover_screen.h": "c",
+        "play_screen.h": "c",
+        "state.h": "c"
     }
 }

@@ -73,7 +73,6 @@ void play_screen_update(float dt) {
 }
 
 void play_screen_draw(void) {
-    BeginDrawing();
 
     ClearBackground(RAYWHITE);
     draw_level_tiles(&gLevel);
@@ -82,7 +81,6 @@ void play_screen_draw(void) {
     draw_hud();
     DrawButton(btnBackToMenu);
 
-    EndDrawing();
 }
 
 void play_screen_unload(void) {
