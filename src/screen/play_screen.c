@@ -11,6 +11,7 @@
 #include "ui/button.h"
 #include "render/draw_utils.h"
 #include <raylib.h>
+#include "progress/progress.h"
 
 
 static Level gLevel;
@@ -23,10 +24,10 @@ static Button btnBackToMenu;
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
-    if (!level_loader_from_id(1, &gLevel)) {
-        TraceLog(LOG_ERROR, "[play] falha ao carregar nivel 1");
+    int level_to_load = progress_get_current_level();
+    if (!level_loader_from_id(level_to_load, &gLevel)) {
+        TraceLog(LOG_ERROR, "[play] falha ao carregar nivel %d",level_to_load);
         return;
-        // opcional: fallback para sair
     }
 
     // Player nasce no spawn em coordenadas de TILE.

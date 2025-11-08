@@ -2,6 +2,7 @@
 #include "core/state.h"
 #include "ui/button.h"
 #include <raylib.h>
+#include "progress/progress.h"
 
 static Button btnLevel1;
 
@@ -18,6 +19,7 @@ void map_screen_init(void){
 void map_screen_update(float dt){
     (void)dt;
     if (UpdateButton(&btnLevel1)){
+        progress_set_current_level(1);
         state_change(SCREEN_PLAY);
     }
     if (UpdateButton(&btnLevel2)){
