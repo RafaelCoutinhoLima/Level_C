@@ -23,6 +23,8 @@ void map_screen_update(float dt){
         state_change(SCREEN_PLAY);
     }
     if (UpdateButton(&btnLevel2)){
+        progress_set_current_level(2);
+        state_change(SCREEN_PLAY);
 
     }
     if (UpdateButton(&btnBackToMenu)){

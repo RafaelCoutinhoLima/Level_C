@@ -9,6 +9,8 @@
 #include"screen/home_screen.h"
 #include"screen/gameover_screen.h"
 #include "screen/map_screen.h"
+#include "progress/progress.h"
+#include "io/input.h"
 
 //constante para o jogo a janela
 #define SCREEN_WIDTH 1280
@@ -39,6 +41,8 @@ bool game_init(void){
     //iniciar o estado do jogo se ta no menu na home 
     //essas coisas
     state_init_manager();
+    progress_init();
+    input_init();
     //mudei a logica da main para aqui fica mais clean a main
     state_register(SCREEN_HOME,home_screen_state());
     state_register(SCREEN_MENU,menu_screen_state());

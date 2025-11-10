@@ -63,6 +63,8 @@ void play_screen_update(float dt) {
     if (gCol.reachedGoal) {
         TraceLog(LOG_INFO, "[play] chegou no goal -> trocar de tela");
         state_change(SCREEN_GAMEOVER);
+        progress_complete_current_level();
+        state_change(SCREEN_GAMEOVER);
     }
     if (UpdateButton(&btnBackToMenu)){
         TraceLog(LOG_INFO, "[Play] botão Voltar acionado");
