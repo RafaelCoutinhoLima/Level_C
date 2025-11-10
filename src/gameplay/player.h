@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <raylib.h>
+#include "io/input.h"
 
 
 typedef struct Player{
@@ -11,12 +12,6 @@ typedef struct Player{
     bool isAlive;
     bool isOnGround;
 }Player;
-
-typedef struct InputState{
-    float moveAxis; // eixo virtual do player, direção horizontal desejada pelo jogador(input)
-    bool jumpPressed; // botão de pulo apertado
-    bool jumpHeld; // segurando botão de pulo
-}InputState;
 
 
 void player_init(Player* player); // inicia o player de forma padrão
