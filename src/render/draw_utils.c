@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "gameplay/player.h"
 #include <math.h>
+#include "progress/progress.h"
 
 void draw_level_tiles (const Level* level){
     if (!level){
@@ -65,8 +66,8 @@ static const char* GetPlayerStateName(const Player* player){
     return "Desconhecido";
 }
 //tirando de playscreen usando level e player no lugar de gplaye glevel
-void draw_hud(const Player* player, const Level* level){
-    if (!player || !level) return;
+void draw_hud(const Player* player, const Level* level,const InputState* input){
+    if (!player || !level || !input) return;
 
     DrawText(TextFormat("pos(%.1f, %.1f) vel(%.1f, %.1f) traps=%zu", 
         player->position.x, player->position.y, 
@@ -75,6 +76,11 @@ void draw_hud(const Player* player, const Level* level){
         12, 12, 18, LIGHTGRAY);
     DrawText(TextFormat("Estado: %s",GetPlayerStateName(player)),
     12,32,18,LIME);
+    DrawText(TextFormat("Input: Eixo[%.1f] Pulo[%d]", input->moveAxis, input->jumpHeld),
+        12, 52, 18, LIME);
         
-    DrawText("ESC: voltar ao menu", 12, 56, 16, LIGHTGRAY);
+    DrawText("ESC: voltar ao menu", 12, 76, 16, LIGHTGRAY);
+    //mostrar o nivel atul
+    DrawText(TextFormat("Nível: %d", progress_get_current_level()), 
+        GetScreenWidth() - 100, 12, 18, DARKGRAY);
 }

@@ -78,7 +78,7 @@ void play_screen_draw(void) {
     draw_level_tiles(&gLevel);
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
-    draw_hud(&gPlayer,&gLevel);
+    draw_hud(&gPlayer,&gLevel,&gInput);
     DrawButton(btnBackToMenu);
 
 }
