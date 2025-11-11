@@ -30,13 +30,17 @@ void player_reset(Player* player, Vector2 spawnPosition){
     if (!player)
         return;
 
+    TraceLog(LOG_DEBUG, "[Player] reset iniciado");
+    
     player->position = spawnPosition; 
     player->velocity = (Vector2){0};
     player->hitbox = make_hitbox(player->position); // recalcula hitbox
     player->isAlive = true;
     player->isOnGround = false;
+    
+    player_update_hitbox(player);
 
-    TraceLog(LOG_INFO, "[Player] reset -> spawn(%.2f, %.2f)", spawnPosition.x, spawnPosition.y);
+    TraceLog(LOG_INFO, "[Player] respawn em (%.2f, %.2f) velocidade limpa", player->position.x, player->position.y);
 }
 
 void player_apply_input(Player* player, const InputState* input, float dt){

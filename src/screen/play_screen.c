@@ -57,18 +57,20 @@ void play_screen_update(float dt) {
     collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
 
     if (gCol.died) {
-        TraceLog(LOG_INFO, "[play] morreu -> reset level");
+        TraceLog(LOG_INFO, "[Play] morreu -> reset level");
         player_reset(&gPlayer, gLevel.spawn);
+        TraceLog(LOG_INFO, "[Play] ciclo: reset -> spawn -> limpeza de velocidade");
     }
     if (gCol.reachedGoal) {
-        TraceLog(LOG_INFO, "[play] chegou no goal -> trocar de tela");
-        state_change(SCREEN_GAMEOVER);
+        TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
         progress_complete_current_level();
         state_change(SCREEN_GAMEOVER);
+        return;
     }
     if (UpdateButton(&btnBackToMenu)){
-        TraceLog(LOG_INFO, "[Play] botão Voltar acionado");
+        TraceLog(LOG_INFO, "[Play] voltar ao menu");
         state_change(SCREEN_MENU);
+        return;
     }
 }
 
