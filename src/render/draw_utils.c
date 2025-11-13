@@ -4,7 +4,20 @@
 #include "gameplay/player.h"
 #include <math.h>
 #include "progress/progress.h"
+#include "io/assets.h"
 
+void DrawSprite(Rectangle source_rect,Vector2 position){
+    Assets* assets = GetAssets();
+    //os assets globais
+    DrawTextureRec(assets->spritesheet_atlas,source_rect,position,WHITE);
+}
+void DrawSpriteAdvanced(Rectangle source_rect,Rectangle dest_rect,Color tint){
+    Assets* assets= GetAssets();
+    //definir a origem do desenho onde ele vai aparecer 
+    Vector2 origin={0.0f, 0.0f };
+
+    DrawTexturePro(assets->spritesheet_atlas,source_rect,dest_rect,origin,0.0f,tint);
+}
 void draw_level_tiles (const Level* level){
     if (!level){
         return;
