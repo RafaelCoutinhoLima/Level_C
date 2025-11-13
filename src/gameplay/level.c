@@ -2,6 +2,8 @@
 #include "player.h"
 #include <string.h>
 #include <raylib.h>
+#include "render/draw_utils.h"
+#include "io/assets.h"
 
 static const float DEFAULT_TILE_SIZE = 32.0f;
 
@@ -56,4 +58,22 @@ void level_reset_player(const Level* level, Player* player){
         return;
 
     player_reset(player, level->spawn);
+}
+void draw_level_tile(const Level* level){
+    if (!level){
+        return;
+    }
+    Assets* assets = GetAssets();
+    Rectangle platform_rect = assets->rect_platform;
+    float tileSize = level->tileSize;
+
+    for (int y=0;y<level->height;y++){
+        for (int x=0;x<level->width;x++){
+            if (level->tiles[y][x] == TILE_SOLID){
+                Vector2 draw_pos={x*tileSize,y*tileSize};
+
+                DrawSprite(platform_rect,draw_pos);
+            }
+        }
+    }
 }

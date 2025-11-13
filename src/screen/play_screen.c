@@ -1,5 +1,4 @@
 #include "play_screen.h"
-
 #include "levels/level_loader.h"
 #include "io/input.h"
 #include "gameplay/level.h"
@@ -12,7 +11,8 @@
 #include "render/draw_utils.h"
 #include <raylib.h>
 #include "progress/progress.h"
-
+#include "io/assets.h"
+#include "render/draw_utils.h"
 
 static Level gLevel;
 static Player gPlayer;

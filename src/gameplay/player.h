@@ -19,3 +19,6 @@ void player_reset(Player* player, Vector2 spawnPosition); // reposiciona no spaw
 void player_apply_input(Player* player, const InputState* input, float dt); // traduz o input ao player 
 void player_update_hitbox(Player* player); // recalcula hitbox após inputs
 Rectangle player_get_bounds(const Player* player); // é o retângulo de colisão do player no momento
+
+void draw_player(const Player* player);
+//para desenhar o boneco na tela

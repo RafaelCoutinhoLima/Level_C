@@ -32,3 +32,4 @@ bool level_is_tile_solid(const Level* level, int tx, int ty);
 Rectangle level_tile_bounds(const Level* level, int tx, int ty);
 struct Player;
 void level_reset_player(const Level* level, struct Player* player);
+void draw_level_tiles(const Level* level);
