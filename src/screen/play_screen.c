@@ -12,7 +12,6 @@
 #include <raylib.h>
 #include "progress/progress.h"
 #include "io/assets.h"
-#include "render/draw_utils.h"
 
 static Level gLevel;
 static Player gPlayer;
@@ -25,20 +24,23 @@ void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
     int level_to_load = progress_get_current_level();
-    if (!level_loader_from_id(level_to_load, &gLevel)) {
-        TraceLog(LOG_ERROR, "[play] falha ao carregar nivel %d",level_to_load);
+    if (!level_load_by_id(&gLevel, level_to_load)){
+        TraceLog(LOG_ERROR, "[Play] Falha ao carregar nível %d, voltando ao mapa", level_to_load);
+        state_change(SCREEN_MAP);
         return;
     }
 
     // Player nasce no spawn em coordenadas de TILE.
     // Se o João usar pixels, converta: posPx = tile * TILE_SIZE
+    physics_init(NULL);
+    physics_configure_for_level(&gLevel);
+    
     player_init(&gPlayer);
     player_reset(&gPlayer, gLevel.spawn);
     collision_result_reset(&gCol);
     gInput = (InputState){0};
     
     input_init();
-    physics_init(NULL);
 
     EnableCursor();
     btnBackToMenu = CreateButton(-1, GetScreenHeight() - 70, 220, 45, "Voltar ao menu");
@@ -51,6 +53,7 @@ void play_screen_update(float dt) {
     player_apply_input(&gPlayer, &gInput, dt);
     physics_update(&gPlayer, &gInput, dt);
     player_update_hitbox(&gPlayer);
+    physics_apply_level_bounds(&gPlayer, &gLevel);
 
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
@@ -64,7 +67,7 @@ void play_screen_update(float dt) {
     if (gCol.reachedGoal) {
         TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
         progress_complete_current_level();
-        state_change(SCREEN_GAMEOVER);
+        state_change(SCREEN_MAP);
         return;
     }
     if (UpdateButton(&btnBackToMenu)){

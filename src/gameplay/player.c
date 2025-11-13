@@ -69,13 +69,3 @@ Rectangle player_get_bounds(const Player* player){
     }
     return player->hitbox;
 }
-void draw_player(const Player* player){
-    if (!player||!player->isAlive){
-        return;//não desenha se tiver morto ou n exitir
-    }
-    Rectangle player_rect = GetAssets()->rect_player;
-    //pega o retangulo do spritw do player
-    Vector2 draw_pos = {player->hitbox.x,player->hitbox.y};
-    DrawSprite(player_rect,draw_pos);
-    
-}

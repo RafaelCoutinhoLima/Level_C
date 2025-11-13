@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include "render/draw_utils.h"
 #include "io/assets.h"
+#include "levels/level_loader.h"
 
 static const float DEFAULT_TILE_SIZE = 32.0f;
 
@@ -76,4 +77,15 @@ void draw_level_tile(const Level* level){
             }
         }
     }
+}
+
+bool level_load_by_id(Level *level, int levelId){
+    if (!level)
+        return false;
+    level->id = levelId;
+    if (!level_loader_from_id(levelId, level)){
+        TraceLog(LOG_ERROR, "[Level] falha ao carregar id=%d", levelId);
+        return false;
+    }
+    return true;
 }

@@ -51,7 +51,7 @@ void draw_player(const Player* player){
     if(!player){
         return;
     }
-    Rectangle bounds=player_get_bounds(player);
+    Rectangle bounds = player_get_bounds(player);
     DrawRectangleRec(bounds,(Color){20,20,20,255});
     if (!player->isAlive){
         DrawRectangleLinesEx(bounds,2.0f,RED);

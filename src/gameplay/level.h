@@ -33,3 +33,4 @@ Rectangle level_tile_bounds(const Level* level, int tx, int ty);
 struct Player;
 void level_reset_player(const Level* level, struct Player* player);
 void draw_level_tiles(const Level* level);
+bool level_load_by_id(Level *level, int levelId);
