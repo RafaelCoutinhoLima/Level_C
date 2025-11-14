@@ -59,6 +59,8 @@ void play_screen_update(float dt) {
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
     collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
 
+    player_anim_update(&gPlayer, dt);
+
     if (gCol.died) {
         TraceLog(LOG_INFO, "[Play] morreu -> reset level");
         player_reset(&gPlayer, gLevel.spawn);

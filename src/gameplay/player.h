@@ -4,6 +4,14 @@
 #include <raylib.h>
 #include "io/input.h"
 
+#define PLAYER_FRAME_WIDTH 24
+#define PLAYER_FRAME_HEIGHT 32
+
+typedef enum {
+    PLAYER_ANIM_IDLE = 0,
+    PLAYER_ANIM_RUN = 1,
+    PLAYER_ANIM_JUMP = 2,
+} PlayerAnimState;
 
 typedef struct Player{
     Vector2 position; // coordenada lógica do player
@@ -11,8 +19,13 @@ typedef struct Player{
     Rectangle hitbox; // retângulo utilizado em colisões //
     bool isAlive;
     bool isOnGround;
+
+    PlayerAnimState animState;
+    int frameIndex;
+    float frameTimer;
 }Player;
 
+void player_anim_update(Player* player, float dt);
 
 void player_init(Player* player); // inicia o player de forma padrão
 void player_reset(Player* player, Vector2 spawnPosition); // reposiciona no spawn e limpa variáveis

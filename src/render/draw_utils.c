@@ -56,9 +56,6 @@ void draw_player(const Player* player){
         DrawRectangleRec(bounds, (Color){20, 20, 20, 255});
         return;
     }
-
-    const int FRAME_W = 24;
-    const int FRAME_H = 32;
     static float idleTimer = 0.0f;
     static int idleFrame = 0;
 
@@ -69,10 +66,10 @@ void draw_player(const Player* player){
     }
 
     Rectangle src = {
-        idleFrame * FRAME_W,
-        0,
-        FRAME_W,
-        FRAME_H
+        player->frameIndex * PLAYER_FRAME_WIDTH,
+        player->animState * PLAYER_FRAME_HEIGHT,
+        PLAYER_FRAME_WIDTH,
+        PLAYER_FRAME_HEIGHT
     };
 
     Vector2 drawPos = {
