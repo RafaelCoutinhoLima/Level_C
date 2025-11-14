@@ -11,6 +11,7 @@
 #include "screen/map_screen.h"
 #include "progress/progress.h"
 #include "io/input.h"
+#include "io/assets.h"
 
 //constante para o jogo a janela
 #define SCREEN_WIDTH 1280
@@ -40,6 +41,12 @@ bool game_init(void){
     SetTargetFPS(TARGET_FPS);
     //iniciar o estado do jogo se ta no menu na home 
     //essas coisas
+
+    assets_init();
+    if (!assets_init()){
+        TraceLog(LOG_FATAL, "[game] falha ao inicializar assets");
+        return false;
+    }
     state_init_manager();
     progress_init();
     input_init();
@@ -68,6 +75,7 @@ void game_loop(void){
     }
 }
 void game_shutdown(void){
+    assets_unload();
     state_shutdown();
     CloseWindow();
     TraceLog(LOG_INFO,"jogo finalizado");

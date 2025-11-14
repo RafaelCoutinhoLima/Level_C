@@ -7,9 +7,7 @@
 //estrutura para o assets carregados
 typedef struct Assets {
     Texture2D spritesheet_atlas;
-    //retangulo de fontes
-    // Em assets.h
-    Rectangle rect_player;       // O boneco
+    Texture2D player_sheet;      // O boneco
     Rectangle rect_platform;     // O bloco de chão/parede sólido
     Rectangle rect_trap_spike;   // Um espinho
     Rectangle rect_goal_door;    // A "porta" para passar de nível

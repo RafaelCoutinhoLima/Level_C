@@ -48,15 +48,60 @@ void draw_traps(const TrapSet* trapSet){
 }
 
 void draw_player(const Player* player){
-    if(!player){
+    if (!player) return;
+
+    Assets* assets = GetAssets();
+    if (assets->player_sheet.id == 0){
+        Rectangle bounds = player_get_bounds(player);
+        DrawRectangleRec(bounds, (Color){20, 20, 20, 255});
         return;
     }
-    Rectangle bounds = player_get_bounds(player);
-    DrawRectangleRec(bounds,(Color){20,20,20,255});
-    if (!player->isAlive){
-        DrawRectangleLinesEx(bounds,2.0f,RED);
+
+    const int FRAME_W = 24;
+    const int FRAME_H = 32;
+    static float idleTimer = 0.0f;
+    static int idleFrame = 0;
+
+    idleTimer += GetFrameTime();
+    if (idleTimer >= 1.0f / 6.0f){
+        idleTimer = 0.0f;
+        idleFrame = (idleFrame + 1) % 4; 
     }
+
+    Rectangle src = {
+        idleFrame * FRAME_W,
+        0,
+        FRAME_W,
+        FRAME_H
+    };
+
+    Vector2 drawPos = {
+        player->hitbox.x + player->hitbox.width * 0.5f,
+        player->hitbox.y + player->hitbox.height
+    };
+
+    Rectangle dest = {
+        drawPos.x,
+        drawPos.y,
+        player->hitbox.width,
+        player->hitbox.height
+    };
+
+    Vector2 origin = {
+        player->hitbox.width * 0.5f,
+        player->hitbox.height
+    };
+
+    DrawTexturePro(
+        assets->player_sheet,
+        src,
+        dest,
+        origin,
+        0.0f,
+        WHITE
+    );
 }
+
 static const char* GetPlayerStateName(const Player* player){
     if(!player->isAlive){
         return "MORTO";

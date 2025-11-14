@@ -3,7 +3,7 @@
 #include "render/draw_utils.h"
 #include "io/assets.h"
 
-static const Vector2 PLAYER_SIZE = {24.0f, 32.0f};
+static const Vector2 PLAYER_SIZE = {30.0f, 40.0f};
 static const float PLAYER_MOVE_SPEED = 180.0f;
 
 static Rectangle make_hitbox(Vector2 center){
