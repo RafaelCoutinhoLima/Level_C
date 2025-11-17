@@ -1,54 +1,100 @@
+// src/render/draw_utils.c
+
 #include "render/draw_utils.h"
 #include <raylib.h>
 #include <stdio.h>
-#include "gameplay/player.h"
 #include <math.h>
+
+#include "gameplay/player.h"
+#include "gameplay/level.h"
+#include "gameplay/tiles.h"   // TILE_SIZE, tileset_src_from_index
+#include "io/input.h"         // InputState
 #include "progress/progress.h"
 #include "io/assets.h"
-#include "gameplay/tiles.h"  // TILE_SIZE, tileset_src_from_index
 
-
-void DrawSprite(Rectangle source_rect,Vector2 position){
+// -----------------------------------------------------------------------------
+// Sprites helpers
+// -----------------------------------------------------------------------------
+void DrawSprite(Rectangle source_rect, Vector2 position){
     Assets* assets = GetAssets();
-    //os assets globais
-    DrawTextureRec(assets->spritesheet_atlas,source_rect,position,WHITE);
+    DrawTextureRec(assets->spritesheet_atlas, source_rect, position, WHITE);
 }
-void DrawSpriteAdvanced(Rectangle source_rect,Rectangle dest_rect,Color tint){
-    Assets* assets= GetAssets();
-    //definir a origem do desenho onde ele vai aparecer 
-    Vector2 origin={0.0f, 0.0f };
 
-    DrawTexturePro(assets->spritesheet_atlas,source_rect,dest_rect,origin,0.0f,tint);
+void DrawSpriteAdvanced(Rectangle source_rect, Rectangle dest_rect, Color tint){
+    Assets* assets = GetAssets();
+    Vector2 origin = (Vector2){0.0f, 0.0f};
+    DrawTexturePro(assets->spritesheet_atlas, source_rect, dest_rect, origin, 0.0f, tint);
 }
-void draw_level_tiles (const Level* level){
-    if (!level){
-        return;
-    }
-    for (int y=0;y<level->height;y++){
-        for (int x=0;x<level->width;x++){
-            if (!level_is_tile_solid(level,x,y)){
-                continue;
-            }
-            Rectangle titleRect= level_tile_bounds(level,x,y);
-            DrawRectangleRec(titleRect,(Color){60,200,80,100});
+
+// -----------------------------------------------------------------------------
+// Desenho do mapa via atlas (usa Level->sprites[y][x])
+// -----------------------------------------------------------------------------
+void draw_level_map(const Level* L) {
+    if (!L) return;
+
+    Assets* A = GetAssets();
+    if (!A || !A->spritesheet_atlas.id) return;
+
+    for (int y = 0; y < L->height; y++) {
+        for (int x = 0; x < L->width; x++) {
+            int idx = L->sprites[y][x];
+            if (idx < 0) idx = 0; // fallback
+
+            Rectangle src = tileset_src_from_index(idx);
+            Vector2   dst = (Vector2){ x * (float)TILE_SIZE, y * (float)TILE_SIZE };
+            DrawTextureRec(A->spritesheet_atlas, src, dst, WHITE);
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+// Sólidos (colisão). Usa rect_platform do atlas; se faltar, fallback colorido.
+// -----------------------------------------------------------------------------
+void draw_level_tiles (const Level* level){
+    if (!level) return;
+
+    Assets* A = GetAssets();
+    float ts = level->tileSize;
+
+    for (int y = 0; y < level->height; y++){
+        for (int x = 0; x < level->width; x++){
+            if (!level_is_tile_solid(level, x, y)) continue;
+
+            Rectangle tileRect = level_tile_bounds(level, x, y);
+
+            if (A && A->spritesheet_atlas.id && A->rect_platform.width > 0 && A->rect_platform.height > 0) {
+                Vector2 pos = { tileRect.x, tileRect.y };
+                DrawSprite(A->rect_platform, pos);
+            } else {
+                // Fallback visual
+                DrawRectangleRec(tileRect, (Color){60,200,80,100});
+                DrawRectangleLinesEx(tileRect, 1.0f, DARKGREEN);
+            }
+        }
+    }
+
+    // Goal como overlay simples (debug)
     DrawRectangleRec(level->goal,(Color){60,200,80,100});
 }
+
+// -----------------------------------------------------------------------------
+// Traps (debug)
+// -----------------------------------------------------------------------------
 void draw_traps(const TrapSet* trapSet){
-    if (!trapSet){
-        return;
-    }
-    for (size_t i=0;i<trapSet->count;i++){
-        const Trap* trap=trap_set_get(trapSet,i);
-        if (!trap||!trap->active){
-            continue;
-        }
+    if (!trapSet) return;
+
+    for (size_t i = 0; i < trapSet->count; i++){
+        const Trap* trap = trap_set_get(trapSet, i);
+        if (!trap || !trap->active) continue;
+
         DrawRectangleRec(trap->hitbox,(Color){210,40,40,220});
         DrawRectangleLinesEx(trap->hitbox,1.5f,RED);
     }
 }
 
+// -----------------------------------------------------------------------------
+// Player
+// -----------------------------------------------------------------------------
 void draw_player(const Player* player){
     if (!player) return;
 
@@ -58,6 +104,7 @@ void draw_player(const Player* player){
         DrawRectangleRec(bounds, (Color){20, 20, 20, 255});
         return;
     }
+
     static float idleTimer = 0.0f;
     static int idleFrame = 0;
 
@@ -102,27 +149,20 @@ void draw_player(const Player* player){
 }
 
 static const char* GetPlayerStateName(const Player* player){
-    if(!player->isAlive){
-        return "MORTO";
-    }//ve se ta vivo
+    if(!player->isAlive) return "MORTO";
+
     if(player->isOnGround){
-        if(fabsf(player->velocity.x)<0.1f){
-            return "PARADO";
-        }else{
-            return "CORRENDO";
-        }
+        if(fabsf(player->velocity.x) < 0.1f) return "PARADO";
+        return "CORRENDO";
     }else{
-        //se for negativo ta subindo,pulando
-        if(player->velocity.y<0.0f){
-            return "Pulando";
-        }
-        else{
-            return "caindo";
-        }
+        if(player->velocity.y < 0.0f) return "Pulando";
+        return "caindo";
     }
-    return "Desconhecido";
 }
-//tirando de playscreen usando level e player no lugar de gplaye glevel
+
+// -----------------------------------------------------------------------------
+// HUD (debug)
+// -----------------------------------------------------------------------------
 void draw_hud(const Player* player, const Level* level,const InputState* input){
     if (!player || !level || !input) return;
 
@@ -131,13 +171,15 @@ void draw_hud(const Player* player, const Level* level,const InputState* input){
         player->velocity.x, player->velocity.y, 
         level->trapSet.count), 
         12, 12, 18, LIGHTGRAY);
-    DrawText(TextFormat("Estado: %s",GetPlayerStateName(player)),
-    12,32,18,LIME);
+
+    DrawText(TextFormat("Estado: %s", GetPlayerStateName(player)),
+        12, 32, 18, LIME);
+
     DrawText(TextFormat("Input: Eixo[%.1f] Pulo[%d]", input->moveAxis, input->jumpHeld),
         12, 52, 18, LIME);
         
     DrawText("ESC: voltar ao menu", 12, 76, 16, LIGHTGRAY);
-    //mostrar o nivel atul
+
     DrawText(TextFormat("Nível: %d", progress_get_current_level()), 
         GetScreenWidth() - 100, 12, 18, DARKGRAY);
 }
