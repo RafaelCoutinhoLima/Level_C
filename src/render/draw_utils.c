@@ -5,6 +5,8 @@
 #include <math.h>
 #include "progress/progress.h"
 #include "io/assets.h"
+#include "gameplay/tiles.h"  // TILE_SIZE, tileset_src_from_index
+
 
 void DrawSprite(Rectangle source_rect,Vector2 position){
     Assets* assets = GetAssets();

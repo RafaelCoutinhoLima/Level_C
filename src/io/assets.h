@@ -4,24 +4,31 @@
 #include <stdbool.h>
 #include <raylib.h>
 
-//estrutura para o assets carregados
+/*
+ * Estrutura com os recursos do jogo.
+ * - spritesheet_atlas: atlas 32x32 (assets/tileset.png)
+ * - player_sheet: folha do player (opcional, assets/player.png)
+ * - rect_*: regiões do atlas para sprites específicos
+ */
 typedef struct Assets {
     Texture2D spritesheet_atlas;
-    Texture2D player_sheet;      // O boneco
-    Rectangle rect_platform;     // O bloco de chão/parede sólido
-    Rectangle rect_trap_spike;   // Um espinho
-    Rectangle rect_goal_door;    // A "porta" para passar de nível
-    Rectangle rect_button_play;  // O botão de "jogar" do menu
-}Assets;
+    Texture2D player_sheet;      // opcional
 
-// Inicializa/verifica assets e estrutura minima de pastas.
-// Retorna false se algo critico estiver faltando.
+    Rectangle rect_platform;     // bloco sólido (ex.: (0,1) no atlas)
+    Rectangle rect_trap_spike;   // trap/espinho (ex.: (0,6))
+    Rectangle rect_goal_door;    // "porta"/goal (ex.: (0,5))
+    Rectangle rect_button_play;  // botão "play" (placeholder, ex.: (0,4))
+} Assets;
+
+/* Inicializa/verifica assets e estrutura mínima de pastas.
+ * Retorna false se algo crítico estiver faltando (ex.: tileset).
+ */
 bool assets_init(void);
 
-// Descarta recursos carregados (texturas, fontes, sons...), se houver.
+/* Descarta recursos carregados (texturas, etc.). */
 void assets_unload(void);
 
-//getter para acessar carregado em qualquer lugar
+/* Acesso global aos assets carregados. */
+Assets* GetAssets(void);
 
-Assets *GetAssets(void);
 #endif // ASSETS_H

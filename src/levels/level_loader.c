@@ -1,3 +1,4 @@
+// src/levels/level_loader.c
 #include "level_loader.h"
 #include "gameplay/level.h"
 #include "gameplay/trap.h"
@@ -5,20 +6,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <raylib.h>   // TraceLog, Vector2, Rectangle
+#include <raylib.h>           // TraceLog, Vector2, Rectangle
+#include "gameplay/tiles.h"   // TILE_SIZE, TSPR_*
 
 #define LINE_MAX 1024
 
-// Converte um caractere da grade do arquivo em um tipo de tile.
-// Ajuste os valores conforme o que seu Level/tiles esperam.
+// char -> tipo de tile (colisão)
 static TileType tile_from_char(char c) {
     switch (c) {
-        case '#': return 1; // sólido
-        case '.': return 0; // vazio
-        case 'S': return 0; // spawn (tile vazio)
-        case 'G': return 0; // goal  (tile vazio)
-        case 'T': return 0; // trap  (tile vazio, trap vai na lista)
-        default : return 0; // desconhecido -> vazio (e podemos logar depois)
+        case '#': return TILE_SOLID;   // parede (colisão)
+        case '.': return TILE_EMPTY;   // chão
+        case 'P': return TILE_EMPTY;   // trilha (arte)
+        case 'X': return TILE_EMPTY;   // túmulo (arte)
+        case 'S': return TILE_EMPTY;   // spawn sobre chão
+        case 'G': return TILE_EMPTY;   // goal sobre chão
+        case 'T': return TILE_EMPTY;   // trap objeto (chão por baixo)
+        default : return TILE_EMPTY;
+    }
+}
+
+// char -> sprite index do atlas (arte)
+static int sprite_index_from_char(char c) {
+    switch (c) {
+        case '#': return TSPR_WALL;
+        case '.': return TSPR_FLOOR;
+        case 'P': return TSPR_PATH;
+        case 'X': return TSPR_GRAVE;
+        case 'S': return TSPR_FLOOR;  // chão por baixo
+        case 'G': return TSPR_GOAL;   // desenha sprite de goal se quiser
+        case 'T': return TSPR_FLOOR;  // piso por baixo da trap
+        default : return TSPR_FLOOR;
     }
 }
 
@@ -36,27 +53,30 @@ bool level_loader_load(const char* path, Level* out) {
         return false;
     }
 
-    level_clear(out);   // garante estado limpo antes
-    level_init(out);    // inicializa defaults (tileSize, etc.)
+    // Defaults (tileSize, trapSet, etc.)
+    level_init(out);
+
+    // Limpa grade anterior (colisão + sprites) e metadados
+    memset(out->tiles,   0, sizeof(out->tiles));
+    memset(out->sprites, 0, sizeof(out->sprites));
+    out->width  = 0;
+    out->height = 0;
+    out->spawn  = (Vector2){0,0};
+    out->goal   = (Rectangle){0,0,0,0};
+    trap_set_clear(&out->trapSet);
 
     FILE* f = fopen(path, "r");
     if (!f) {
-        TraceLog(LOG_ERROR, "[level_loader] Nao abriu arquivo de nivel: %s", path);
+        TraceLog(LOG_ERROR, "[level_loader] Nao abriu arquivo: %s", path);
         return false;
     }
 
-    // Formato suportado:
-    //   1a linha util: "W H" (largura e altura)
-    //   depois: H linhas com caracteres {#,.,S,G,T}
-    //
-    // Comentarios: linhas que comecam com ';' ou '#' fora da grade
-    // sao ignoradas. Dentro da grade, cada linha deve possuir ao
-    // menos W caracteres uteis (o que faltar vira '.').
+    // 1ª linha útil: "W H"
     int width = 0, height = 0;
     char line[LINE_MAX];
 
-    // Ler primeira linha com W H (pulando comentarios e linhas vazias)
     while (fgets(line, LINE_MAX, f)) {
+        // Antes da grade, ignore ';', '#', e linhas vazias
         if (line[0] == ';' || line[0] == '#' || line[0] == '\n' || line[0] == '\r')
             continue;
         if (sscanf(line, "%d %d", &width, &height) == 2)
@@ -75,7 +95,7 @@ bool level_loader_load(const char* path, Level* out) {
     out->width  = width;
     out->height = height;
 
-    const float tileSize = (out->tileSize > 0.0f) ? out->tileSize : 32.0f;
+    const float tileSize = (out->tileSize > 0.0f) ? out->tileSize : (float)TILE_SIZE;
 
     Vector2   spawn = (Vector2){0};
     Rectangle goal  = (Rectangle){0};
@@ -84,9 +104,8 @@ bool level_loader_load(const char* path, Level* out) {
 
     int y = 0;
     while (y < height && fgets(line, LINE_MAX, f)) {
-        // dentro da grade: apenas linha iniciada por ';' permanece ignorada
-        if (line[0] == ';')
-            continue;
+        // Dentro da grade: ignore apenas linhas iniciadas por ';'
+        if (line[0] == ';') continue;
 
         strip_newline(line);
         const int len = (int)strlen(line);
@@ -94,22 +113,26 @@ bool level_loader_load(const char* path, Level* out) {
         for (int x = 0; x < width; x++) {
             const char c = (x < len) ? line[x] : '.';
 
-            // Preenche tile
-            const TileType t = tile_from_char(c);
-            out->tiles[y][x] = t;
+            // Colisão + Sprite
+            out->tiles[y][x]   = tile_from_char(c);
+            out->sprites[y][x] = sprite_index_from_char(c);
 
-            // Spawn/Goal/Trap
+            // Objetos/posições especiais
             switch (c) {
                 case 'S':
+                    // Centro do tile (x+0.5), base do pé (y+1.0) em PIXELS
                     spawn    = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     hasSpawn = true;
                     break;
+
                 case 'G':
+                    // goal como retângulo do tamanho do tile em PIXELS
                     goal     = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
                     hasGoal  = true;
                     break;
+
                 case 'T': {
-                    Trap trap = {0};
+                    Trap trap = (Trap){0};
                     trap.position = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     trap.hitbox   = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
                     trap.type     = TRAP_TYPE_SPIKE;
@@ -117,12 +140,13 @@ bool level_loader_load(const char* path, Level* out) {
 
                     if (!trap_set_add(&out->trapSet, trap)) {
                         TraceLog(LOG_WARNING,
-                                 "[level_loader] Capacidade de traps esgotada; descartando em (%d,%d)",
+                                 "[level_loader] Capacidade de traps esgotada; descartando T em (%d,%d)",
                                  x, y);
                     }
                 } break;
+
                 default:
-                    // Se quiser logar tiles desconhecidos: TraceLog(LOG_DEBUG, ...)
+                    // '.', 'P', 'X' etc: só arte; já setamos colisão/sprite acima
                     break;
             }
         }
@@ -143,7 +167,6 @@ bool level_loader_load(const char* path, Level* out) {
 
     if (!hasSpawn) {
         TraceLog(LOG_WARNING, "[level_loader] Nao encontrou spawn (S) em %s", path);
-        // sem spawn nao aborta: menu pode reposicionar manualmente, se quiser
     }
     if (!hasGoal) {
         TraceLog(LOG_WARNING, "[level_loader] Nao encontrou goal (G) em %s", path);

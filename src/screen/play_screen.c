@@ -1,3 +1,4 @@
+// src/screen/play_screen.c
 #include "play_screen.h"
 #include "levels/level_loader.h"
 #include "io/input.h"
@@ -19,27 +20,24 @@ static CollisionResult gCol;
 static InputState gInput;
 static Button btnBackToMenu;
 
-
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
     int level_to_load = progress_get_current_level();
-    if (!level_load_by_id(&gLevel, level_to_load)){
+    if (!level_load_by_id(&gLevel, level_to_load)) {
         TraceLog(LOG_ERROR, "[Play] Falha ao carregar nível %d, voltando ao mapa", level_to_load);
         state_change(SCREEN_MAP);
         return;
     }
 
-    // Player nasce no spawn em coordenadas de TILE.
-    // Se o João usar pixels, converta: posPx = tile * TILE_SIZE
     physics_init(NULL);
     physics_configure_for_level(&gLevel);
-    
+
     player_init(&gPlayer);
     player_reset(&gPlayer, gLevel.spawn);
+
     collision_result_reset(&gCol);
     gInput = (InputState){0};
-    
     input_init();
 
     EnableCursor();
@@ -72,7 +70,7 @@ void play_screen_update(float dt) {
         state_change(SCREEN_MAP);
         return;
     }
-    if (UpdateButton(&btnBackToMenu)){
+    if (UpdateButton(&btnBackToMenu)) {
         TraceLog(LOG_INFO, "[Play] voltar ao menu");
         state_change(SCREEN_MENU);
         return;
@@ -81,24 +79,29 @@ void play_screen_update(float dt) {
 
 void play_screen_draw(void) {
     ClearBackground(RAYWHITE);
-    
+
+    // 1) mapa completo via atlas (usa Level->sprites[][])
+    draw_level_map(&gLevel);
+
+    // 2) sólidos por cima (mantém visual coerente com colisão)
     draw_level_tiles(&gLevel);
+
+    // 3) restante
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
-    draw_hud(&gPlayer,&gLevel,&gInput);
+    draw_hud(&gPlayer, &gLevel, &gInput);
     DrawButton(btnBackToMenu);
-
 }
 
 void play_screen_unload(void) {
     level_loader_unload(&gLevel);
 }
 
-GameState play_screen_state(void){
+GameState play_screen_state(void) {
     return (GameState){
-        .init = play_screen_init,
+        .init   = play_screen_init,
         .update = play_screen_update,
-        .draw = play_screen_draw,
+        .draw   = play_screen_draw,
         .unload = play_screen_unload,
     };
 }
