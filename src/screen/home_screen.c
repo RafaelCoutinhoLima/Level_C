@@ -5,12 +5,14 @@
 
 //criar uma static para o botão entrar
 static Button btnGoToMenu;
+static Texture2D titleScreen;
 
 //função para carregar a tela
 void home_screen_init(void){
     TraceLog(LOG_INFO,"[Home] init");
     //usar x-1 para elee centralizar automaticamente
     //y=300,tam=250x50,txt:entrar
+    titleScreen = LoadTexture("assets/title-screen.png");
     btnGoToMenu = CreateButton(-1,300,250,50,"Entrar");
 
 }
@@ -25,6 +27,7 @@ void home_screen_update(float dt){
 }
 void home_screen_draw(void){
     //limpa a tela com um cor de fundo azul escuro
+    DrawTexture(titleScreen, 0, 0, WHITE);
     ClearBackground((Color){20, 20, 30, 255});
 
     const char *title = "LEVEL C";
@@ -35,6 +38,7 @@ void home_screen_draw(void){
     DrawButton(btnGoToMenu);
 }
 void home_screen_unload(void){
+    UnloadTexture(titleScreen);
     TraceLog(LOG_INFO,"[Home] unload");
 }
 

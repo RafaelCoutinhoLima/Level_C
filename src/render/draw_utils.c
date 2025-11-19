@@ -99,6 +99,7 @@ void draw_player(const Player* player){
     if (!player) return;
 
     Assets* assets = GetAssets();
+    // Caso não consiga carregar a sprite, gera um personagem genérico
     if (assets->player_sheet.id == 0){
         Rectangle bounds = player_get_bounds(player);
         DrawRectangleRec(bounds, (Color){20, 20, 20, 255});
