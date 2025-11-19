@@ -105,21 +105,19 @@ void draw_player(const Player* player){
         return;
     }
 
-    static float idleTimer = 0.0f;
-    static int idleFrame = 0;
+    int absoluteFrame = player_get_absolute_frame(player);
 
-    idleTimer += GetFrameTime();
-    if (idleTimer >= 1.0f / 6.0f){
-        idleTimer = 0.0f;
-        idleFrame = (idleFrame + 1) % 4; 
-    }
 
     Rectangle src = {
-        player->frameIndex * PLAYER_FRAME_WIDTH,
-        player->animState * PLAYER_FRAME_HEIGHT,
+        absoluteFrame * PLAYER_FRAME_WIDTH,
+        0,
         PLAYER_FRAME_WIDTH,
         PLAYER_FRAME_HEIGHT
     };
+
+    if (!player->facingRight){
+        src.width = -src.width;
+    }
 
     Vector2 drawPos = {
         player->hitbox.x + player->hitbox.width * 0.5f,

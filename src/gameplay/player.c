@@ -3,10 +3,14 @@
 #include "render/draw_utils.h"
 #include "io/assets.h"
 
-static const Vector2 PLAYER_SIZE = {30.0f, 40.0f};
+static const Vector2 PLAYER_SIZE = {24.0f, 32.0f};
 static const float PLAYER_MOVE_SPEED = 180.0f;
 
-static const int PLAYER_FRAMES_PER_STATE[] = {4, 6, 4};
+// Frame 0: Estático
+// Frame 1-6: Andando
+// Frame 7-9: Pulo
+static const int PLAYER_START_FRAME[] = {0, 1, 7}; // Primeiro de cada estado
+static const int PLAYER_FRAMES_PER_STATE[] = {1, 6, 3}; // Quantidade de frames de cada estado
 static const float PLAYER_FPS_PER_STATE[] = {6.0f, 10.0f, 8.0f};
 static const float PLAYER_RUN_THRESHOLD = 20.0f;
 
@@ -30,21 +34,19 @@ static void player_set_anim_state(Player* player, PlayerAnimState newState){
 static void player_update_animation(Player* player, float dt){
     if (!player) return;
 
+    // Para pulo, 0(7) = subindo, 1(8) = ápice, 2(9) = caindo
     if (player->animState == PLAYER_ANIM_JUMP){
-        player->frameTimer = 0.0f;
-
-        if (player->velocity.y < -120.0f){
-            player->frameIndex = 1;
-        }else if (player->velocity.y < 0.0f){
-            player->frameIndex = 2;
-        }else if (player->velocity.y < 160.0f){
-            player->frameIndex = 3;
-        }else{
+        if (player->velocity.y< -60.0f){
             player->frameIndex = 0;
+        } else if (player->velocity.y < 60.0f){
+            player->frameIndex = 1;
+        } else{
+            player->frameIndex = 2;
         }
         return;
     }
 
+    // Para estático e correndo
     int frameCount = PLAYER_FRAMES_PER_STATE[player->animState];
     float fps = PLAYER_FPS_PER_STATE[player->animState];
 
@@ -85,6 +87,7 @@ void player_init(Player* player){
     player->hitbox = make_hitbox(player->position); // hitbox em 0,0
     player->isAlive = true;
     player->isOnGround = true;
+    player->facingRight = true;
     player->animState = PLAYER_ANIM_IDLE;
     player->frameIndex = 0;
     player->frameTimer = 0.0f;
@@ -103,6 +106,7 @@ void player_reset(Player* player, Vector2 spawnPosition){
     player->hitbox = make_hitbox(player->position); // recalcula hitbox
     player->isAlive = true;
     player->isOnGround = false;
+    player->facingRight = true;
     
     player_update_hitbox(player);
 
@@ -115,6 +119,12 @@ void player_apply_input(Player* player, const InputState* input, float dt){
     
     float previousVX = player->velocity.x;
     player->velocity.x = input->moveAxis * PLAYER_MOVE_SPEED; // calcula nova velocidade
+
+    if (input->moveAxis > 0.0f){
+        player->facingRight = true;
+    } else if (input->moveAxis < 0.0f){
+        player->facingRight = false;
+    }
 
     TraceLog(LOG_DEBUG, "[Player] input -> axis=%.2f velX: %.2f -> %.2f dt= %.3f", input->moveAxis, previousVX, player->velocity.x, dt); 
 }
@@ -132,4 +142,11 @@ Rectangle player_get_bounds(const Player* player){
         return empty;
     }
     return player->hitbox;
+}
+
+int player_get_absolute_frame(const Player* player){
+    if (!player) return 0;
+
+    int startFrame = PLAYER_START_FRAME[player->animState];
+    return startFrame + player->frameIndex;
 }
