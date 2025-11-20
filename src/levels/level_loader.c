@@ -20,7 +20,11 @@ static TileType tile_from_char(char c) {
         case 'X': return TILE_EMPTY;   // túmulo (arte)
         case 'S': return TILE_EMPTY;   // spawn sobre chão
         case 'G': return TILE_EMPTY;   // goal sobre chão
-        case 'T': return TILE_EMPTY;   // trap objeto (chão por baixo)
+        // traps como caracteres na grade não são sólidos
+        case 'T': return TILE_EMPTY;   // trap padrão (compat)
+        case '^': return TILE_EMPTY;   // spike explícito
+        case 'F': return TILE_EMPTY;   // fogo
+        case 'M': return TILE_EMPTY;   // mina
         default : return TILE_EMPTY;
     }
 }
@@ -33,8 +37,12 @@ static int sprite_index_from_char(char c) {
         case 'P': return TSPR_PATH;
         case 'X': return TSPR_GRAVE;
         case 'S': return TSPR_FLOOR;  // chão por baixo
-        case 'G': return TSPR_GOAL;   // desenha sprite de goal se quiser
-        case 'T': return TSPR_FLOOR;  // piso por baixo da trap
+        case 'G': return TSPR_GOAL;   // sprite de goal
+        // traps como objeto: desenhamos piso por baixo
+        case 'T': return TSPR_FLOOR;
+        case '^': return TSPR_FLOOR;
+        case 'F': return TSPR_FLOOR;
+        case 'M': return TSPR_FLOOR;
         default : return TSPR_FLOOR;
     }
 }
@@ -131,16 +139,24 @@ bool level_loader_load(const char* path, Level* out) {
                     hasGoal  = true;
                     break;
 
-                case 'T': {
+                // traps como objetos (piso por baixo)
+                case 'T':   // trap padrão (compat)
+                case '^':   // spike explícito
+                case 'F':   // fogo
+                case 'M': { // mina
                     Trap trap = (Trap){0};
                     trap.position = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     trap.hitbox   = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
-                    trap.type     = TRAP_TYPE_SPIKE;
-                    trap.active   = true;
+
+                    if (c == 'F')      trap.type = TRAP_TYPE_FIRE;
+                    else if (c == 'M') trap.type = TRAP_TYPE_MINE;
+                    else               trap.type = TRAP_TYPE_SPIKE; // 'T' ou '^'
+
+                    trap.active = true;
 
                     if (!trap_set_add(&out->trapSet, trap)) {
                         TraceLog(LOG_WARNING,
-                                 "[level_loader] Capacidade de traps esgotada; descartando T em (%d,%d)",
+                                 "[level_loader] Capacidade de traps esgotada; descartando trap em (%d,%d)",
                                  x, y);
                     }
                 } break;

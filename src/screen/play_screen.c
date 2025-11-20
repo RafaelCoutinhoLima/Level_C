@@ -13,6 +13,7 @@
 #include <raylib.h>
 #include "progress/progress.h"
 #include "io/assets.h"
+#include "io/audio.h"  // << NOVO
 
 static Level gLevel;
 static Player gPlayer;
@@ -22,6 +23,9 @@ static Button btnBackToMenu;
 
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
+
+    // Áudio (idempotente: se já inicializado, só retorna true)
+    audio_init();
 
     int level_to_load = progress_get_current_level();
     if (!level_load_by_id(&gLevel, level_to_load)) {
@@ -45,6 +49,9 @@ void play_screen_init(void) {
 }
 
 void play_screen_update(float dt) {
+    // Mantém streaming da música
+    audio_update();
+
     collision_result_reset(&gCol);
 
     input_update_player(&gInput);
@@ -60,11 +67,13 @@ void play_screen_update(float dt) {
     player_anim_update(&gPlayer, dt);
 
     if (gCol.died) {
+        audio_play_event(AUDIO_SFX_DIE);  // << NOVO
         TraceLog(LOG_INFO, "[Play] morreu -> reset level");
         player_reset(&gPlayer, gLevel.spawn);
         TraceLog(LOG_INFO, "[Play] ciclo: reset -> spawn -> limpeza de velocidade");
     }
     if (gCol.reachedGoal) {
+        audio_play_event(AUDIO_SFX_GOAL); // << NOVO
         TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
         progress_complete_current_level();
         state_change(SCREEN_MAP);

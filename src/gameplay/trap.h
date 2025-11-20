@@ -4,27 +4,31 @@
 #include <raylib.h>
 #include <stdbool.h>
 
+// Tipos de armadilhas (ordem preservada, adicionando FIRE e MINE)
 typedef enum TrapType{
-    TRAP_TYPE_SPIKE = 0,
-    TRAP_TYPE_FALLING,
-    TRAP_TYPE_PROJECTILE,
+    TRAP_TYPE_SPIKE = 0,     // espinho (default)
+    TRAP_TYPE_FIRE,          // NOVO: fogo
+    TRAP_TYPE_MINE,          // NOVO: mina terrestre
+    TRAP_TYPE_FALLING,       // queda (plataforma/objeto que cai)
+    TRAP_TYPE_PROJECTILE,    // projétil
     TRAP_TYPE_COUNT
-}TrapType;
+} TrapType;
 
 typedef struct Trap{
-    Vector2 position;
-    Rectangle hitbox;
+    Vector2 position;   // centro do tile (em pixels)
+    Rectangle hitbox;   // AABB em pixels
     TrapType type;
     bool active;
-}Trap;
+} Trap;
 
 #define TRAPSET_MAX_TRAPS 128
 
 typedef struct TrapSet{
     Trap traps[TRAPSET_MAX_TRAPS];
     size_t count;
-}TrapSet;
+} TrapSet;
 
+// API do conjunto de traps
 void trap_set_init(TrapSet* set);
 bool trap_set_add(TrapSet* set, Trap trap);
 void trap_set_clear(TrapSet* set);
