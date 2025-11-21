@@ -81,7 +81,7 @@ void play_screen_update(float dt) {
     }
     if (UpdateButton(&btnBackToMenu)) {
         TraceLog(LOG_INFO, "[Play] voltar ao menu");
-        state_change(SCREEN_MENU);
+        state_change(SCREEN_MAP);
         return;
     }
 }

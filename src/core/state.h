@@ -4,10 +4,8 @@
 typedef enum{
     STATE_ID_NONE=-1,
     SCREEN_HOME,
-    SCREEN_MENU,
     SCREEN_MAP,
     SCREEN_PLAY,
-    SCREEN_GAMEOVER,
 } GameStateId;
 // usa ponteiros para acessar as funções fica melhor
 //por que senão teria que usar if else no state.c pode causar um bug

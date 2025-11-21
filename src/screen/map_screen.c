@@ -64,7 +64,7 @@ void map_screen_update(float dt){
         state_change(SCREEN_PLAY);
     }
     if (UpdateButton(&btnBackToMenu)){
-        state_change(SCREEN_MENU);
+        state_change(SCREEN_HOME);
     }
 
     // Toggle música
