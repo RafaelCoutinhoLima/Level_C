@@ -1,42 +1,64 @@
 #include "home_screen.h"
 #include "raylib.h"
-#include "core/state.h"//para as funções das mudanças 
+#include "core/state.h"
 #include "ui/button.h"
 
-//criar uma static para o botão entrar
 static Button btnGoToMenu;
 static Texture2D titleScreen;
 
-//função para carregar a tela
+// X=460 (Mais para a esquerda para centralizar melhor)
+// Y=500 (Bem mais alto para pegar toda a borda de luz em cima)
+// W=360 (Mais largo para garantir que não corta a direita)
+// H=120 (Mais alto para pegar até a sombra de baixo)
+static Rectangle sourceButtonRec = { 460, 500, 420, 120 };
+
 void home_screen_init(void){
     TraceLog(LOG_INFO,"[Home] init");
-    //usar x-1 para elee centralizar automaticamente
-    //y=300,tam=250x50,txt:entrar
     titleScreen = LoadTexture("assets/title-screen.png");
-    btnGoToMenu = CreateButton(-1,300,250,50,"Entrar");
+    
+    // Mantém o pixel art nítido
+    SetTextureFilter(titleScreen, TEXTURE_FILTER_POINT); 
 
+    btnGoToMenu = CreateButton(sourceButtonRec.x, sourceButtonRec.y, sourceButtonRec.width, sourceButtonRec.height, "");
 }
 
 void home_screen_update(float dt){
     (void)dt;
-
     if (UpdateButton(&btnGoToMenu)){
-        state_change(SCREEN_MENU);
-        //se clicar pede a maquina estado mudar para tela screen menu
+        state_change(SCREEN_MAP);
     }
 }
+
 void home_screen_draw(void){
-    //limpa a tela com um cor de fundo azul escuro
-    DrawTexture(titleScreen, 0, 0, WHITE);
     ClearBackground((Color){20, 20, 30, 255});
+    DrawTexture(titleScreen, 0, 0, WHITE);
 
-    const char *title = "LEVEL C";
-    const int fontsize = 60;
-    const int textWidth = MeasureText(title, fontsize);
+    if (btnGoToMenu.hovered) {
+        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
-    DrawText(title,(GetScreenWidth()-textWidth)/2, 150, fontsize, WHITE);
-    DrawButton(btnGoToMenu);
+        float scale = 1.03f; 
+        
+        Rectangle destRec = {
+            sourceButtonRec.x - (sourceButtonRec.width * (scale - 1.0f)) / 2.0f,
+            sourceButtonRec.y - (sourceButtonRec.height * (scale - 1.0f)) / 2.0f - 2.0f,
+            sourceButtonRec.width * scale,
+            sourceButtonRec.height * scale
+        };
+
+        DrawTexturePro(
+            titleScreen,
+            sourceButtonRec,
+            destRec,
+            (Vector2){0,0}, 
+            0.0f, 
+            WHITE
+        );
+
+    } else {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
 }
+
 void home_screen_unload(void){
     UnloadTexture(titleScreen);
     TraceLog(LOG_INFO,"[Home] unload");

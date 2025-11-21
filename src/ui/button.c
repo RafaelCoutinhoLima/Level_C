@@ -1,5 +1,6 @@
 #include "button.h"
 #include "raylib.h"
+#include <string.h>
 
 Button CreateButton(float x,float y,float width,float height,const char *text){
     Button button= {0};
@@ -9,7 +10,7 @@ Button CreateButton(float x,float y,float width,float height,const char *text){
     //faz a verificação e centraliza os limites de x e y
     button.bounds = (Rectangle){posX,posY,width,height};
     //pegando as dimensões do botão 
-    button.text= text;
+    TextCopy(button.text,text);
 
     button.baseColor=(Color){60,60,60,255};//cinza esscuro
     button.hoverColor=(Color){100,100,100,255};//cinza medio
@@ -60,4 +61,11 @@ void DrawButton(Button button){
     float textY =button.bounds.y+(button.bounds.height-fontSize)/2.0f;
     
     DrawText(button.text,(int)textX,(int)textY,fontSize,WHITE);
+}
+void SetButtonText(Button *btn, const char *text) {
+    if (btn != NULL && text != NULL) {
+        // Copia o texto novo para dentro do botão.
+        // A função TextCopy é da Raylib e evita buffer overflow se o texto for grande.
+        TextCopy(btn->text, text);
+    }
 }

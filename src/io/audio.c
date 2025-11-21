@@ -1,5 +1,6 @@
 // src/io/audio.c
 #include "audio.h"
+#include "stddef.h"
 #include <raylib.h>
 
 // Estado interno do módulo de áudio
