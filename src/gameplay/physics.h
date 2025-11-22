@@ -2,7 +2,8 @@
 
 #include <raylib.h>
 #include "gameplay/player.h"
-
+typedef struct InputState InputState;
+typedef struct Level Level;
 typedef struct PhysicsParams{
     float gravity;
     float jumpSpeed;

@@ -1,8 +1,11 @@
 #include "physics.h"
-#include "level.h"
+#include "level.h"     
+#include "io/input.h"  // Necessário para ler input->moveAxis
 #include <raylib.h>
 #include <raymath.h>
+#include <math.h>      // Para fabsf (float absolute)
 
+// Valores Padrão (Hardcoded para segurança)
 static PhysicsParams gPhysBase = {
     .gravity = 1800.0f,
     .jumpSpeed = 520.0f,
@@ -13,41 +16,50 @@ static PhysicsParams gPhysBase = {
 
 static PhysicsParams gPhysCurrent;
 
-void physics_init(const PhysicsParams* params){
-    if (params)
-        gPhysBase = *params;
+// Constantes de movimento
+#define MOVE_ACCEL_GROUND  2000.0f
+#define MOVE_ACCEL_AIR      800.0f
+#define FRICTION_GROUND    1800.0f
+#define FRICTION_AIR        200.0f
+#define MOVE_SPEED_MAX      220.0f
 
-    TraceLog(LOG_INFO, "[Physics] init -> g=%.1f jump=%.1f maxFall=%.1f cut=%.2f fallMul=%.2f", gPhysCurrent.gravity, gPhysCurrent.jumpSpeed, gPhysBase.maxFallSpeed, gPhysCurrent.jumpCutMultiplier, gPhysCurrent.fallGravityMultiplier);
+void physics_init(const PhysicsParams* params){
+    if (params) {
+        gPhysBase = *params;
+    }
+    
+    gPhysCurrent = gPhysBase;
+
+    // Segurança para evitar gravidade zero
+    if (gPhysCurrent.gravity <= 1.0f) gPhysCurrent.gravity = 1800.0f;
+    if (gPhysCurrent.jumpSpeed <= 1.0f) gPhysCurrent.jumpSpeed = 520.0f;
+
+    TraceLog(LOG_INFO, "[Physics] init -> g=%.1f jump=%.1f", gPhysCurrent.gravity, gPhysCurrent.jumpSpeed);
 }
 
 static void try_start_jump(Player* player, const InputState* input){
-    if (!player || !input)
-        return;
+    if (!player || !input) return;
     
-    if (!input->jumpPressed)
-        return;
-    
-    if (!player->isOnGround)
-        return;
-
-    player->velocity.y = -gPhysCurrent.jumpSpeed;
-    player->isOnGround = false;
-
-    TraceLog(LOG_DEBUG, "[Physics] jump -> velY=%.1f", player->velocity.y);
+    if (input->jumpPressed && player->isOnGround) {
+        player->velocity.y = -gPhysCurrent.jumpSpeed;
+        player->isOnGround = false;
+        TraceLog(LOG_DEBUG, "[Physics] jump -> velY=%.1f", player->velocity.y);
+    }
 }
 
 static void apply_gravity(Player* player, const InputState* input, float dt){
-    if (!player)
-        return;
+    if (!player) return;
 
     float gravity = gPhysCurrent.gravity;
+    
     if (player->velocity.y < 0.0f){
         if (!input || !input->jumpHeld){
             gravity *= gPhysCurrent.jumpCutMultiplier;
         }
-    }else{
+    } else {
         gravity *= gPhysCurrent.fallGravityMultiplier;
     }
+    
     player->velocity.y += gravity * dt;
 
     if (player->velocity.y > gPhysCurrent.maxFallSpeed){
@@ -56,21 +68,50 @@ static void apply_gravity(Player* player, const InputState* input, float dt){
 }
 
 void physics_update(Player* player, const InputState* input, float dt){
-    if (!player)
-        return;
-
-    if (dt <= 0.0f){
-        dt = 1.0f / 60.0f;
-    }
-    TraceLog(LOG_TRACE, "[Physics] pre pos(%.2f, %.2f) vel(%.2f, %.2f)", player->position.x, player->position.y, player->velocity.x, player->velocity.y);
+    if (!player) return;
+    if (dt <= 0.0f) dt = 1.0f / 60.0f;
 
     try_start_jump(player, input);
     apply_gravity(player, input, dt);
+    float targetSpeed = 0.0f;
+    
+    if (input) {
+        // moveAxis < 0 é esquerda, > 0 é direita
+        if (input->moveAxis < -0.1f) {
+            targetSpeed = -MOVE_SPEED_MAX;
+        } 
+        else if (input->moveAxis > 0.1f) {
+            targetSpeed = MOVE_SPEED_MAX;
+        }
+    }
+
+    float accel = player->isOnGround ? MOVE_ACCEL_GROUND : MOVE_ACCEL_AIR;
+    float friction = player->isOnGround ? FRICTION_GROUND : FRICTION_AIR;
+
+    if (targetSpeed != 0.0f) {
+        // Acelerando
+        if (player->velocity.x < targetSpeed) {
+            player->velocity.x += accel * dt;
+            if (player->velocity.x > targetSpeed) player->velocity.x = targetSpeed;
+        } else {
+            player->velocity.x -= accel * dt;
+            if (player->velocity.x < targetSpeed) player->velocity.x = targetSpeed;
+        }
+    } else {
+        // Parando (Atrito)
+        if (player->velocity.x > 0) {
+            player->velocity.x -= friction * dt;
+            if (player->velocity.x < 0) player->velocity.x = 0;
+        } else if (player->velocity.x < 0) {
+            player->velocity.x += friction * dt;
+            if (player->velocity.x > 0) player->velocity.x = 0;
+        }
+    }
 
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
 
-    TraceLog(LOG_TRACE, "[Physics] post pos (%.2f, %.2f) vel(%.2f, %.2f)", player->position.x, player->position.y, player->velocity.x, player->velocity.y);
+    player_update_hitbox(player);
 }
 
 void physics_configure_for_level(const Level *level){
@@ -89,49 +130,26 @@ void physics_configure_for_level(const Level *level){
     gPhysCurrent.jumpCutMultiplier = gPhysBase.jumpCutMultiplier;
     gPhysCurrent.fallGravityMultiplier = gPhysBase.fallGravityMultiplier;
 
-    TraceLog(LOG_INFO, "[Physics] configurada para nível %d (tile %.1f, escala %.2f)", level->id, tileSize, scale);
+    TraceLog(LOG_INFO, "[Physics] configurada (scale=%.2f) -> g=%.1f", scale, gPhysCurrent.gravity);
 }
 
 void physics_apply_level_bounds(Player *player, const Level *level) {
     if (!player || !level) return;
 
     const float levelWidth  = level->width  * level->tileSize;
-    const float levelHeight = level->height * level->tileSize;
 
-    if (levelWidth <= 0.0f || levelHeight <= 0.0f) return;
-    if (player->hitbox.width <= 0.0f || player->hitbox.height <= 0.0f) return;
-
-    const float minX = 0.0f;
-    const float minY = 0.0f;
-    const float maxX = levelWidth  - player->hitbox.width;
-    const float maxY = levelHeight - player->hitbox.height;
-
-    if (maxX < minX || maxY < minY) {
-        player_update_hitbox(player);
-        return;
+    if (player->position.x < player->hitbox.width/2) {
+        player->position.x = player->hitbox.width/2;
+        player->velocity.x = 0;
+    } 
+    else if (player->position.x > levelWidth - player->hitbox.width/2) {
+        player->position.x = levelWidth - player->hitbox.width/2;
+        player->velocity.x = 0;
     }
-
-    if (player->hitbox.x < minX) {
-        player->hitbox.x = minX;
-        if (player->velocity.x < 0.0f) player->velocity.x = 0.0f;
-    } else if (player->hitbox.x > maxX) {
-        player->hitbox.x = maxX;
-        if (player->velocity.x > 0.0f) player->velocity.x = 0.0f;
+    
+    if (player->position.y < -500) { 
+        player->velocity.y = 100.0f; 
     }
-
-    if (player->hitbox.y < minY) {
-        player->hitbox.y = minY;
-        if (player->velocity.y < 0.0f) player->velocity.y = 0.0f;
-    } else if (player->hitbox.y > maxY) {
-        player->hitbox.y = maxY;
-        if (player->velocity.y > 0.0f) player->velocity.y = 0.0f;
-        player->isOnGround = true;
-    }
-
-    player->position.x = player->hitbox.x + player->hitbox.width * 0.5f;
-    player->position.y = player->hitbox.y + player->hitbox.height;
 
     player_update_hitbox(player);
 }
-
-

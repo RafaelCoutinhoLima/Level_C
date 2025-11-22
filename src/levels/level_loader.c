@@ -25,6 +25,8 @@ static TileType tile_from_char(char c) {
         case '^': return TILE_EMPTY;   // spike explícito
         case 'F': return TILE_EMPTY;   // fogo
         case 'M': return TILE_EMPTY;   // mina
+        case 'H': return TILE_EMPTY;   //oneway atravessavel
+        case 'D': return TILE_EMPTY;   //bloco disappearing 
         default : return TILE_EMPTY;
     }
 }
@@ -43,6 +45,8 @@ static int sprite_index_from_char(char c) {
         case '^': return TSPR_FLOOR;
         case 'F': return TSPR_FLOOR;
         case 'M': return TSPR_FLOOR;
+        case 'H': return TSPR_FLOOR;
+        case 'D': return TSPR_FLOOR;
         default : return TSPR_FLOOR;
     }
 }
@@ -143,21 +147,26 @@ bool level_loader_load(const char* path, Level* out) {
                 case 'T':   // trap padrão (compat)
                 case '^':   // spike explícito
                 case 'F':   // fogo
-                case 'M': { // mina
+                case 'M':   // mina
+                case 'H':   //oneway atravessavel
+                case 'D':{//disappearing 
                     Trap trap = (Trap){0};
                     trap.position = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     trap.hitbox   = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
 
-                    if (c == 'F')      trap.type = TRAP_TYPE_FIRE;
+                    if (c == 'F')      trap.type = TRAP_TYPE_FALSE;        // F = Plataforma Falsa
+                    else if (c == 'H') trap.type = TRAP_TYPE_ONEWAY;       // H = One-Way
+                    else if (c == 'D') trap.type = TRAP_TYPE_DISAPPEARING; // D = Bloco que some
                     else if (c == 'M') trap.type = TRAP_TYPE_MINE;
-                    else               trap.type = TRAP_TYPE_SPIKE; // 'T' ou '^'
-
+                    else               trap.type = TRAP_TYPE_SPIKE;        // T ou ^
                     trap.active = true;
+                    //Inicializar o estado padrão para o bloco D
+                    trap.state = TRAP_STATE_ACTIVE;
+                    trap.timer = 0.0f;
 
                     if (!trap_set_add(&out->trapSet, trap)) {
                         TraceLog(LOG_WARNING,
-                                 "[level_loader] Capacidade de traps esgotada; descartando trap em (%d,%d)",
-                                 x, y);
+                                 "[level_loader] Trap descartada em (%d,%d) - Full", x, y);
                     }
                 } break;
 

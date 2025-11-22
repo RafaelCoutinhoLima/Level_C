@@ -26,9 +26,6 @@ void DrawSpriteAdvanced(Rectangle source_rect, Rectangle dest_rect, Color tint){
     DrawTexturePro(assets->spritesheet_atlas, source_rect, dest_rect, origin, 0.0f, tint);
 }
 
-// -----------------------------------------------------------------------------
-// Desenho do mapa via atlas (usa Level->sprites[y][x])
-// -----------------------------------------------------------------------------
 void draw_level_map(const Level* L) {
     if (!L) return;
 
@@ -84,11 +81,61 @@ void draw_traps(const TrapSet* trapSet){
     if (!trapSet) return;
 
     for (size_t i = 0; i < trapSet->count; i++){
-        const Trap* trap = trap_set_get(trapSet, i);
-        if (!trap || !trap->active) continue;
+        const Trap* t = trap_set_get(trapSet, i);
+        if (!t || !t->active) continue;
 
-        DrawRectangleRec(trap->hitbox,(Color){210,40,40,220});
-        DrawRectangleLinesEx(trap->hitbox,1.5f,RED);
+        Color color;
+        
+        switch (t->type) {
+            //Espinho / Perigo (Vermelho)
+            case TRAP_TYPE_SPIKE:
+            case TRAP_TYPE_FIRE:
+            case TRAP_TYPE_MINE:
+                DrawRectangleRec(t->hitbox, RED);
+                // Triângulo visual
+                DrawTriangle(
+                    (Vector2){t->hitbox.x, t->hitbox.y + t->hitbox.height},
+                    (Vector2){t->hitbox.x + t->hitbox.width, t->hitbox.y + t->hitbox.height},
+                    (Vector2){t->hitbox.x + t->hitbox.width/2, t->hitbox.y},
+                    MAROON
+                );
+                break;
+
+            //F:Plataforma Falsa (Roxo Transparente)
+            case TRAP_TYPE_FALSE:
+                color = Fade(PURPLE, 0.5f);
+                DrawRectangleRec(t->hitbox, color);
+                DrawRectangleLinesEx(t->hitbox, 2, PURPLE);
+                DrawText("F", t->hitbox.x + 10, t->hitbox.y + 5, 20, WHITE);
+                break;
+
+            //H:One-Way / Atravessável (Azul)
+            case TRAP_TYPE_ONEWAY:
+                color = Fade(SKYBLUE, 0.4f);
+                DrawRectangleRec(t->hitbox, color);
+                DrawRectangle(t->hitbox.x, t->hitbox.y, t->hitbox.width, 4, BLUE);
+                DrawText("H", t->hitbox.x + 10, t->hitbox.y + 8, 10, DARKBLUE);
+                break;
+
+            //D:Bloco que Some (Laranja)
+            case TRAP_TYPE_DISAPPEARING:
+                if (t->state == TRAP_STATE_OFF) {
+                    // Se sumiu: Desenha só o contorno fantasma
+                    DrawRectangleLinesEx(t->hitbox, 1, Fade(ORANGE, 0.3f));
+                } else {
+                    color = ORANGE;
+                    // Se está tremendo (WARNING), pisca branco
+                    if (t->state == TRAP_STATE_WARNING) {
+                        if (((int)(GetTime() * 15)) % 2 == 0) color = WHITE;
+                    }
+                    DrawRectangleRec(t->hitbox, color);
+                    DrawRectangleLinesEx(t->hitbox, 2, DARKBROWN);
+                }
+                break;
+            default:
+                DrawRectangleRec(t->hitbox, GRAY);
+                break;
+        }
     }
 }
 

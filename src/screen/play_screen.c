@@ -21,6 +21,8 @@ static CollisionResult gCol;
 static InputState gInput;
 static Button btnBackToMenu;
 
+static Camera2D gCamera;
+
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
@@ -46,6 +48,16 @@ void play_screen_init(void) {
 
     EnableCursor();
     btnBackToMenu = CreateButton(-1, GetScreenHeight() - 70, 220, 45, "Voltar ao menu");
+    // Configura Câmera
+    float mapWidth = gLevel.width * gLevel.tileSize;
+    float mapHeight = gLevel.height * gLevel.tileSize;
+    // Aponta a câmera para o MEIO do mapa
+    gCamera.target = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
+    // Centraliza esse ponto no MEIO da sua tela
+    gCamera.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    gCamera.rotation = 0.0f;
+    // Zoom de 2.0x (cabe o mapa inteiro na tela de 720p com folga)
+    gCamera.zoom = 2.0f;
 }
 
 void play_screen_update(float dt) {
@@ -59,7 +71,8 @@ void play_screen_update(float dt) {
     physics_update(&gPlayer, &gInput, dt);
     player_update_hitbox(&gPlayer);
     physics_apply_level_bounds(&gPlayer, &gLevel);
-
+    // atualizar o bloco q some
+    trap_set_update(&gLevel.trapSet, dt);
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
     collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
@@ -71,6 +84,7 @@ void play_screen_update(float dt) {
         TraceLog(LOG_INFO, "[Play] morreu -> reset level");
         player_reset(&gPlayer, gLevel.spawn);
         TraceLog(LOG_INFO, "[Play] ciclo: reset -> spawn -> limpeza de velocidade");
+        
     }
     if (gCol.reachedGoal) {
         audio_play_event(AUDIO_SFX_GOAL); // << NOVO
@@ -88,7 +102,7 @@ void play_screen_update(float dt) {
 
 void play_screen_draw(void) {
     ClearBackground(RAYWHITE);
-
+    BeginMode2D(gCamera);
     // 1) mapa completo via atlas (usa Level->sprites[][])
     draw_level_map(&gLevel);
 
@@ -100,6 +114,7 @@ void play_screen_draw(void) {
     draw_player(&gPlayer);
     draw_hud(&gPlayer, &gLevel, &gInput);
     DrawButton(btnBackToMenu);
+    EndMode2D();
 }
 
 void play_screen_unload(void) {
