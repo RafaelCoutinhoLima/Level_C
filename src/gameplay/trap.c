@@ -45,4 +45,35 @@ const Trap* trap_set_get(const TrapSet* set, size_t index){
     }
     return &set->traps[index];
 }
+//para saber o estado das temporaria active ou off
+Trap* trap_set_get_mutable(TrapSet* set, size_t index){
+    if (!set || index >= set->count){
+        return NULL;
+    }
+    return &set->traps[index];
+}
+// Atualiza timers e estados (ex: faz o bloco sumir depois de um tempo)
+void trap_set_update(TrapSet* set, float dt) {
+    if (!set) return;
 
+    for (size_t i = 0; i < set->count; i++) {
+        Trap* t = &set->traps[i];
+        if (!t->active) continue;
+        //Bloco Temporário (D)
+        if (t->type == TRAP_TYPE_DISAPPEARING) {
+            if (t->state == TRAP_STATE_WARNING) {
+                t->timer -= dt;
+                if (t->timer <= 0.0f) {
+                    t->state = TRAP_STATE_OFF; // Desaparece
+                    t->timer = 2.5f;           // Tempo para voltar (respawn)
+                }
+            }
+            else if (t->state == TRAP_STATE_OFF) {
+                t->timer -= dt;
+                if (t->timer <= 0.0f) {
+                    t->state = TRAP_STATE_ACTIVE; // Reaparece
+                }
+            }
+        }
+    }
+}
