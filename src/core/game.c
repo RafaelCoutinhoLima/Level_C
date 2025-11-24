@@ -1,3 +1,4 @@
+// src/core/game.c
 #include "game.h"
 #include "core/state.h"
 #include <raylib.h>
@@ -31,7 +32,8 @@ bool game_init(void) {
         TraceLog(LOG_FATAL, "[game] falha ao inicializar assets");
         return false;
     }
-    // Áudio não é obrigatório para iniciar, mas tentamos
+
+    // Áudio: tenta iniciar (se os arquivos não existirem, só dá warning)
     audio_init();
 
     state_init_manager();
@@ -50,6 +52,10 @@ bool game_init(void) {
 void game_loop(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
+
+        // Mantém streaming da música tocando certinho
+        audio_update();
+
         state_update(dt);
 
         BeginDrawing();

@@ -1,3 +1,4 @@
+// src/screen/play_screen.c
 #include "play_screen.h"
 #include "levels/level_loader.h"
 #include "io/input.h"
@@ -24,6 +25,7 @@ static Camera2D gCamera;
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
+    // Garante áudio ativo (idempotente)
     audio_init();
 
     int level_to_load = progress_get_current_level();
@@ -51,11 +53,17 @@ void play_screen_init(void) {
     gCamera.target  = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
     gCamera.offset  = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     gCamera.rotation= 0.0f;
-    gCamera.zoom    = 1.3f;
+    gCamera.zoom    = 1.3f; // ajuste fino se quiser aproximar/afastar
 }
 
 void play_screen_update(float dt) {
+    // Mantém streaming da música
     audio_update();
+
+    // Toggle de música também aqui (atalho M)
+    if (IsKeyPressed(KEY_M)) {
+        audio_toggle_music();
+    }
 
     collision_result_reset(&gCol);
 
@@ -65,7 +73,9 @@ void play_screen_update(float dt) {
     player_update_hitbox(&gPlayer);
     physics_apply_level_bounds(&gPlayer, &gLevel);
 
+    // Traps com comportamento (se houver)
     trap_set_update(&gLevel.trapSet, dt);
+
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
     collisions_check_goal(&gPlayer, &gLevel.goal, &gCol);
@@ -79,6 +89,7 @@ void play_screen_update(float dt) {
         TraceLog(LOG_INFO, "[Play] O jogador morreu. Morte contabilizada.");
         player_reset(&gPlayer, gLevel.spawn);
     }
+
     if (gCol.reachedGoal) {
         audio_play_event(AUDIO_SFX_GOAL);
         TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
@@ -86,6 +97,7 @@ void play_screen_update(float dt) {
         state_change(SCREEN_MAP);
         return;
     }
+
     if (UpdateButton(&btnBackToMenu)) {
         TraceLog(LOG_INFO, "[Play] voltar ao menu");
         state_change(SCREEN_MAP);
@@ -104,6 +116,7 @@ void play_screen_draw(void) {
     draw_player(&gPlayer);
     EndMode2D();
 
+    // HUD e UI (fora da câmera)
     draw_hud(&gPlayer, &gLevel, &gInput);
     DrawButton(btnBackToMenu);
 }
