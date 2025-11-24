@@ -54,4 +54,12 @@ dkms.conf
 # debug information files
 *.dwo
 
+# Build folder
 build/
+
+# --- NOVOS ---
+# User specific & Game Data
+*.dat
+*.sav
+*.log
+.vscode/
