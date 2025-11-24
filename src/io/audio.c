@@ -3,14 +3,19 @@
 #include <stddef.h>
 #include <raylib.h>
 
-// Estado interno do módulo de áudio
+// -------------------- Volumes (0.0f a 1.0f) --------------------
+#define MASTER_VOL 1.0f
+#define MUSIC_VOL  1.0f
+#define SFX_VOL    1.0f
+// ---------------------------------------------------------------
+
 typedef struct {
     bool initialized;
     bool musicOn;
 
-    Music bg;        // música de fundo (stream)
-    Sound sfx_die;   // efeito: morte
-    Sound sfx_goal;  // efeito: goal
+    Music bg;
+    Sound sfx_die;
+    Sound sfx_goal;
 
     bool bgLoaded;
     bool dieLoaded;
@@ -28,10 +33,8 @@ bool audio_init(void) {
         return false;
     }
 
-    // Volume global
-    SetMasterVolume(1.0f);
+    SetMasterVolume(MASTER_VOL);
 
-    // Carrega trilha e efeitos
     G.bg        = LoadMusicStream("assets/audio/bg_main.ogg");
     G.bgLoaded  = (G.bg.stream.buffer != NULL);
     TraceLog(G.bgLoaded ? LOG_INFO : LOG_WARNING,
@@ -48,24 +51,26 @@ bool audio_init(void) {
              G.goalLoaded ? "[audio] goal.wav OK" : "[audio] goal.wav não encontrado");
 
     if (G.bgLoaded) {
-        SetMusicVolume(G.bg, 0.8f);
+        SetMusicVolume(G.bg, MUSIC_VOL);
         PlayMusicStream(G.bg);
         G.musicOn = true;
-        TraceLog(LOG_INFO, "[audio] Música iniciada (ON)");
+        TraceLog(LOG_INFO, "[audio] Música iniciada (ON, vol=%.2f)", (float)MUSIC_VOL);
     } else {
         G.musicOn = false;
     }
 
+    if (G.dieLoaded)  SetSoundVolume(G.sfx_die,  SFX_VOL);
+    if (G.goalLoaded) SetSoundVolume(G.sfx_goal, SFX_VOL);
+
     G.initialized = true;
-    TraceLog(LOG_INFO, "[audio] init ok (musicOn=%d)", G.musicOn);
+    TraceLog(LOG_INFO, "[audio] init ok (master=%.2f, sfx=%.2f, music=%.2f, musicOn=%d)",
+             (float)MASTER_VOL, (float)SFX_VOL, (float)MUSIC_VOL, G.musicOn);
     return true;
 }
 
 void audio_update(void) {
     if (!G.initialized) return;
-    if (G.musicOn && G.bgLoaded) {
-        UpdateMusicStream(G.bg);
-    }
+    if (G.musicOn && G.bgLoaded) UpdateMusicStream(G.bg);
 }
 
 void audio_play_event(AudioEvent e) {
@@ -74,9 +79,9 @@ void audio_play_event(AudioEvent e) {
     switch (e) {
         case AUDIO_SFX_DIE:
             if (G.dieLoaded) {
-                SetSoundVolume(G.sfx_die, 1.0f);
+                SetSoundVolume(G.sfx_die, SFX_VOL);
                 PlaySound(G.sfx_die);
-                TraceLog(LOG_INFO, "[audio] play DIE");
+                TraceLog(LOG_INFO, "[audio] play DIE (vol=%.2f)", (float)SFX_VOL);
             } else {
                 TraceLog(LOG_WARNING, "[audio] DIE não disponível");
             }
@@ -84,16 +89,15 @@ void audio_play_event(AudioEvent e) {
 
         case AUDIO_SFX_GOAL:
             if (G.goalLoaded) {
-                SetSoundVolume(G.sfx_goal, 1.0f);
+                SetSoundVolume(G.sfx_goal, SFX_VOL);
                 PlaySound(G.sfx_goal);
-                TraceLog(LOG_INFO, "[audio] play GOAL");
+                TraceLog(LOG_INFO, "[audio] play GOAL (vol=%.2f)", (float)SFX_VOL);
             } else {
                 TraceLog(LOG_WARNING, "[audio] GOAL não disponível");
             }
             break;
 
-        default:
-            break;
+        default: break;
     }
 }
 
@@ -105,9 +109,10 @@ void audio_toggle_music(void) {
         G.musicOn = false;
         TraceLog(LOG_INFO, "[audio] Música pausada (OFF)");
     } else {
+        SetMusicVolume(G.bg, MUSIC_VOL); // re-aplica volume ao retomar
         ResumeMusicStream(G.bg);
         G.musicOn = true;
-        TraceLog(LOG_INFO, "[audio] Música retomada (ON)");
+        TraceLog(LOG_INFO, "[audio] Música retomada (ON, vol=%.2f)", (float)MUSIC_VOL);
     }
 }
 
