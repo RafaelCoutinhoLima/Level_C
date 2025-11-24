@@ -167,7 +167,7 @@ void map_screen_draw(void) {
     }
     //SCORE DE MORTES 
     int deaths = progress_get_total_deaths();
-    DrawText(TextFormat("%d", deaths), 100, 645, 40, WHITE);
+    DrawText(TextFormat("%d", deaths), 105, 638, 55, WHITE);
 
     DrawButton(btnBackToMenu);
 
