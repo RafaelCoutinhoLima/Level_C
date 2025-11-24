@@ -1,5 +1,5 @@
 #include "assets.h"
-#include <raylib.h>   // TraceLog, DirectoryExists, FileExists
+#include <raylib.h>   
 
 static Assets g_assets;
 
@@ -22,16 +22,11 @@ static bool check_required_paths(void) {
         TraceLog(LOG_ERROR, "[assets] Diretório 'assets' nao encontrado.");
         ok = false;
     }
-    // Atlas do tileset é obrigatório na Sprint 3
     if (!FileExists("assets/tileset.png")) {
         TraceLog(LOG_ERROR, "[assets] Arquivo 'assets/tileset.png' nao encontrado (atlas obrigatorio).");
         ok = false;
     }
-    // Player é opcional (aviso apenas)
-    if (!FileExists("assets/player.png")) {
-        TraceLog(LOG_WARNING, "[assets] 'assets/player.png' nao encontrado (seguindo sem player sheet).");
-    }
-
+    
     return ok;
 }
 
@@ -43,7 +38,7 @@ bool assets_init(void) {
         return false;
     }
 
-    // Carrega o atlas principal
+    //Carrega o atlas principal
     g_assets.spritesheet_atlas = LoadTexture("assets/tileset.png");
     if (g_assets.spritesheet_atlas.id == 0) {
         TraceLog(LOG_ERROR, "[assets] Falha ao carregar 'assets/tileset.png'");
@@ -53,41 +48,47 @@ bool assets_init(void) {
     TraceLog(LOG_INFO, "[assets] tileset ok: %dx%d",
              g_assets.spritesheet_atlas.width, g_assets.spritesheet_atlas.height);
 
-    // Player (opcional)
+    //Player (opcional)
     if (FileExists("assets/player.png")) {
         g_assets.player_sheet = LoadTexture("assets/player.png");
         if (g_assets.player_sheet.id) {
             SetTextureFilter(g_assets.player_sheet, TEXTURE_FILTER_POINT);
             TraceLog(LOG_INFO, "[assets] player sheet id=%u", g_assets.player_sheet.id);
         } else {
-            TraceLog(LOG_WARNING, "[assets] Falha ao carregar 'assets/player.png' (seguindo sem).");
             g_assets.player_sheet = (Texture2D){0};
         }
     } else {
         g_assets.player_sheet = (Texture2D){0};
     }
-// 3.Carrega o fundo do mapa (map_bg.png)
+
+    //Carrega o fundo do mapa (map_bg.png)
     if (FileExists("assets/map_bg.png")) {
         g_assets.map_background = LoadTexture("assets/map_bg.png");
         if (g_assets.map_background.id) {
-            // Se a imagem for pixel art, mantemos o filtro POINT. 
-            // Se for alta resolução, pode remover esta linha.
             SetTextureFilter(g_assets.map_background, TEXTURE_FILTER_POINT);
             TraceLog(LOG_INFO, "[assets] map_background carregado (map_bg.png).");
         } else {
-            TraceLog(LOG_WARNING, "[assets] Falha ao carregar 'assets/map_bg.png'.");
             g_assets.map_background = (Texture2D){0};
         }
     } else {
-        TraceLog(LOG_WARNING, "[assets] 'assets/map_bg.png' nao encontrado. O mapa ficara sem fundo.");
         g_assets.map_background = (Texture2D){0};
     }
 
-    // Definição dos Retângulos do Tileset (Convenção)
-    g_assets.rect_platform     = (Rectangle){  32, 0, 32, 32 };  // (0,1)
-    g_assets.rect_trap_spike   = (Rectangle){ 64, 0, 32, 32 };  // (0,6)
-    g_assets.rect_goal_door    = (Rectangle){ 96, 0, 32, 32 };  // (0,5)
-    g_assets.rect_trap_false  = (Rectangle){ 128, 0, 32, 32 };
+    //CARREGA A FONTE
+    if (FileExists("assets/font.ttf")) {
+        g_assets.gameFont = LoadFontEx("assets/font.ttf", 64, 0, 0);
+        SetTextureFilter(g_assets.gameFont.texture, TEXTURE_FILTER_POINT);
+        TraceLog(LOG_INFO, "[assets] Fonte carregada!");
+    } else {
+        TraceLog(LOG_WARNING, "[assets] font.ttf nao encontrada. Usando padrao.");
+        g_assets.gameFont = GetFontDefault();
+    }
+
+    // Definição dos Retângulos do Tileset
+    g_assets.rect_platform     = (Rectangle){  32, 0, 32, 32 };  
+    g_assets.rect_trap_spike   = (Rectangle){ 64, 0, 32, 32 };  
+    g_assets.rect_goal_door    = (Rectangle){ 96, 0, 32, 32 };  
+    g_assets.rect_trap_false   = (Rectangle){ 128, 0, 32, 32 };
 
     return true;
 }
@@ -97,14 +98,14 @@ void assets_unload(void) {
 
     if (g_assets.spritesheet_atlas.id) {
         UnloadTexture(g_assets.spritesheet_atlas);
-        g_assets.spritesheet_atlas = (Texture2D){0};
     }
     if (g_assets.player_sheet.id) {
         UnloadTexture(g_assets.player_sheet);
-        g_assets.player_sheet = (Texture2D){0};
     }
     if (g_assets.map_background.id) {
         UnloadTexture(g_assets.map_background);
-        g_assets.map_background = (Texture2D){0};
+    }
+    if (g_assets.gameFont.texture.id > 0) {
+        UnloadFont(g_assets.gameFont);
     }
 }
