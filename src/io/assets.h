@@ -13,11 +13,19 @@
 typedef struct Assets {
     Texture2D spritesheet_atlas;
     Texture2D player_sheet;      // opcional
+<<<<<<< HEAD
     Texture2D map_background;
     Rectangle rect_platform;     // bloco sólido (ex.: (0,1) no atlas)
     Rectangle rect_trap_spike;   // trap/espinho (ex.: (0,6))
     Rectangle rect_goal_door;    // "porta"/goal (ex.: (0,5))
     Rectangle rect_button_play;  // botão "play" (placeholder, ex.: (0,4))
+=======
+
+    Rectangle rect_platform;     // bloco sólido
+    Rectangle rect_trap_spike;   // trap/espinho
+    Rectangle rect_trap_false;
+    Rectangle rect_goal_door;    // "porta"/goal 
+>>>>>>> 6e10015 (Tiles sendo desenhadas corretamente)
 } Assets;
 
 /* Inicializa/verifica assets e estrutura mínima de pastas.

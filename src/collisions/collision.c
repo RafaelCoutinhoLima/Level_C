@@ -238,72 +238,58 @@ void collisions_resolve_player_map(Player* player, const Level* level, Collision
 
 void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionResult* result) {
     if (!player || !trapSet || !result) return;
+
     Rectangle pRect = player_get_bounds(player);
     // Tolerância para subir na plataforma One-Way (pixels)
-    const float kOneWayThreshold = 8.0f; 
+    const float kOneWayThreshold = 8.0f;
+
     for (size_t i = 0; i < trapSet->count; i++) {
         // Usamos get_mutable para poder alterar o estado do Bloco D
         Trap* trap = trap_set_get_mutable(trapSet, i);
         if (!trap || !trap->active) continue;
+
         // Bloco D "OFF" é invisível e intangível
         if (trap->type == TRAP_TYPE_DISAPPEARING && trap->state == TRAP_STATE_OFF) continue;
+
         // Verifica colisão básica AABB
         if (CheckCollisionRecs(pRect, trap->hitbox)) {
             switch (trap->type) {
                 //MORTAL (Espinhos, Fogo)
                 case TRAP_TYPE_SPIKE:
-                case TRAP_TYPE_FIRE:
-                case TRAP_TYPE_MINE:
-                case TRAP_TYPE_PROJECTILE:
                     result->hitTrap = true;
-                    result->died    = true;
+                    result->died = true;
                     player->isAlive = false;
-                    TraceLog(LOG_INFO, "[Collision] Trap mortal idx=%zu", i);
+                    TraceLog(LOG_INFO, "Player morreu em espinho!");
                     break;
-
-                //PLATAFORMA FALSA (F)
-                case TRAP_TYPE_FALSE:
-                    // Pode adicionar um log de debug se quiser:
-                    // TraceLog(LOG_DEBUG, "Atravessou plataforma falsa");
-                    break;
+                    
                 //ONE-WAY (H)
                 case TRAP_TYPE_ONEWAY: {
-                    // Lógica: Só colide se estiver CAINDO
                     bool isFalling = player->velocity.y > 0;
-                    
-                    // E se os pés estavam "acima" ou "quase acima" da plataforma
-                    // (pRect.y + pRect.height) é o pé do jogador
                     float feetY = pRect.y + pRect.height;
                     float trapTop = trap->hitbox.y;
-                    // Verificação de altura com tolerância
                     bool isAbove = (feetY <= trapTop + kOneWayThreshold + (player->velocity.y * GetFrameTime()));
+
                     if (isFalling && isAbove) {
-                        // Encaixa o jogador em cima
-                        player->position.y = trap->hitbox.y; // Define pé na altura do topo
-                        player_update_hitbox(player); // Recalcula bounds
-                        player->velocity.y = 0.0f;
-                        player->isOnGround = true;
-                        result->hitGround = true;
-                    }
-                } break;
-                //BLOCO TEMPORÁRIO (D)
-                case TRAP_TYPE_DISAPPEARING: {
-                    // Comporta-se como sólido normal (chão/parede)
-                    // Simplificação: Vamos tratar como plataforma sólida vindo de cima
-                    // Se quiser colisão lateral perfeita, teria que usar lógica parecida com resolve_horizontal
-                    
-                    // Check simples: está pisando em cima?
-                    float feetY = pRect.y + pRect.height;
-                    float overlapY = feetY - trap->hitbox.y;
-                    // Se está caindo e bateu no topo (com pequena margem de penetração)
-                    if (player->velocity.y >= 0 && overlapY > 0 && overlapY < 16.0f) {
-                        // Resolve física
                         player->position.y = trap->hitbox.y;
                         player_update_hitbox(player);
                         player->velocity.y = 0.0f;
                         player->isOnGround = true;
                         result->hitGround = true;
-                        // Ativa o timer se estiver sólido
+                    }
+                } break;
+
+                //BLOCO TEMPORÁRIO (D)
+                case TRAP_TYPE_DISAPPEARING: {
+                    float feetY = pRect.y + pRect.height;
+                    float overlapY = feetY - trap->hitbox.y;
+
+                    if (player->velocity.y >= 0 && overlapY > 0 && overlapY < 16.0f) {
+                        player->position.y = trap->hitbox.y;
+                        player_update_hitbox(player);
+                        player->velocity.y = 0.0f;
+                        player->isOnGround = true;
+                        result->hitGround = true;
+                        
                         if (trap->state == TRAP_STATE_ACTIVE) {
                             trap->state = TRAP_STATE_OFF;
                             TraceLog(LOG_INFO, "Bloco D desapareceu! idx=%zu", i);
@@ -311,7 +297,8 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     }
                 } break;
 
-                default: break;
+                default: 
+                    break;
             }
         }
     }

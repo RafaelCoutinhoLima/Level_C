@@ -97,6 +97,7 @@ void play_screen_draw(void) {
     BeginMode2D(gCamera);
     draw_level_map(&gLevel);
     draw_level_tiles(&gLevel);
+    draw_goal(&gLevel);
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
     EndMode2D();
