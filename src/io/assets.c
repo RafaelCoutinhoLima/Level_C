@@ -66,14 +66,29 @@ bool assets_init(void) {
     } else {
         g_assets.player_sheet = (Texture2D){0};
     }
+// 3.Carrega o fundo do mapa (map_bg.png)
+    if (FileExists("assets/map_bg.png")) {
+        g_assets.map_background = LoadTexture("assets/map_bg.png");
+        if (g_assets.map_background.id) {
+            // Se a imagem for pixel art, mantemos o filtro POINT. 
+            // Se for alta resolução, pode remover esta linha.
+            SetTextureFilter(g_assets.map_background, TEXTURE_FILTER_POINT);
+            TraceLog(LOG_INFO, "[assets] map_background carregado (map_bg.png).");
+        } else {
+            TraceLog(LOG_WARNING, "[assets] Falha ao carregar 'assets/map_bg.png'.");
+            g_assets.map_background = (Texture2D){0};
+        }
+    } else {
+        TraceLog(LOG_WARNING, "[assets] 'assets/map_bg.png' nao encontrado. O mapa ficara sem fundo.");
+        g_assets.map_background = (Texture2D){0};
+    }
 
-    // Convenção do atlas (linha 0, 32x32)
+    // Definição dos Retângulos do Tileset (Convenção)
     g_assets.rect_platform     = (Rectangle){  32, 0, 32, 32 };  // (0,1)
     g_assets.rect_trap_spike   = (Rectangle){ 192, 0, 32, 32 };  // (0,6)
     g_assets.rect_goal_door    = (Rectangle){ 160, 0, 32, 32 };  // (0,5)
-    g_assets.rect_button_play  = (Rectangle){ 128, 0, 32, 32 };  // (0,4) placeholder
+    g_assets.rect_button_play  = (Rectangle){ 128, 0, 32, 32 };  // (0,4)
 
-    TraceLog(LOG_INFO, "[assets] rects prontos: platform(0,1) trap(0,6) goal(0,5) button(0,4)");
     return true;
 }
 
@@ -87,5 +102,9 @@ void assets_unload(void) {
     if (g_assets.player_sheet.id) {
         UnloadTexture(g_assets.player_sheet);
         g_assets.player_sheet = (Texture2D){0};
+    }
+    if (g_assets.map_background.id) {
+        UnloadTexture(g_assets.map_background);
+        g_assets.map_background = (Texture2D){0};
     }
 }

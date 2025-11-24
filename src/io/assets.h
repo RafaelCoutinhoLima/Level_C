@@ -13,7 +13,7 @@
 typedef struct Assets {
     Texture2D spritesheet_atlas;
     Texture2D player_sheet;      // opcional
-
+    Texture2D map_background;
     Rectangle rect_platform;     // bloco sólido (ex.: (0,1) no atlas)
     Rectangle rect_trap_spike;   // trap/espinho (ex.: (0,6))
     Rectangle rect_goal_door;    // "porta"/goal (ex.: (0,5))
