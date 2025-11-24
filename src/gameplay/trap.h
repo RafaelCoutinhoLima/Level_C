@@ -9,16 +9,10 @@ typedef enum TrapType{
     TRAP_TYPE_SPIKE = 0,     // espinho (default)
     TRAP_TYPE_ONEWAY,        // H:atravesavel de baixo para cima
     TRAP_TYPE_FALSE,         // F:plataforma falsa
-    TRAP_TYPE_DISAPPEARING,  // D:bloco temporario
-    TRAP_TYPE_FIRE,          // NOVO: fogo
-    TRAP_TYPE_MINE,          // NOVO: mina terrestre
-    TRAP_TYPE_FALLING,       // queda (plataforma/objeto que cai)
-    TRAP_TYPE_PROJECTILE,    // projétil
-    TRAP_TYPE_COUNT
+    TRAP_TYPE_DISAPPEARING,
 } TrapType;
 typedef enum TrapState{
     TRAP_STATE_ACTIVE,
-    TRAP_STATE_WARNING,
     TRAP_STATE_OFF,
 }TrapState;
 typedef struct Trap{

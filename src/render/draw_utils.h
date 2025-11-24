@@ -19,4 +19,5 @@ void draw_player(const Player* player);
 //modificar o hud para receber os dados para n usar variaver globais de outras telas
 void draw_hud(const Player* player,const Level* level,const InputState* input);
 void draw_level_map(const Level* L); // NOVO
+void draw_goal(const Level* level);
 #endif

@@ -85,9 +85,9 @@ bool assets_init(void) {
 
     // Definição dos Retângulos do Tileset (Convenção)
     g_assets.rect_platform     = (Rectangle){  32, 0, 32, 32 };  // (0,1)
-    g_assets.rect_trap_spike   = (Rectangle){ 192, 0, 32, 32 };  // (0,6)
-    g_assets.rect_goal_door    = (Rectangle){ 160, 0, 32, 32 };  // (0,5)
-    g_assets.rect_button_play  = (Rectangle){ 128, 0, 32, 32 };  // (0,4)
+    g_assets.rect_trap_spike   = (Rectangle){ 64, 0, 32, 32 };  // (0,6)
+    g_assets.rect_goal_door    = (Rectangle){ 96, 0, 32, 32 };  // (0,5)
+    g_assets.rect_trap_false  = (Rectangle){ 128, 0, 32, 32 };
 
     return true;
 }

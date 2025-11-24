@@ -16,15 +16,9 @@ static TileType tile_from_char(char c) {
     switch (c) {
         case '#': return TILE_SOLID;   // parede (colisão)
         case '.': return TILE_EMPTY;   // chão
-        case 'P': return TILE_EMPTY;   // trilha (arte)
-        case 'X': return TILE_EMPTY;   // túmulo (arte)
         case 'S': return TILE_EMPTY;   // spawn sobre chão
         case 'G': return TILE_EMPTY;   // goal sobre chão
-        // traps como caracteres na grade não são sólidos
-        case 'T': return TILE_EMPTY;   // trap padrão (compat)
         case '^': return TILE_EMPTY;   // spike explícito
-        case 'F': return TILE_EMPTY;   // fogo
-        case 'M': return TILE_EMPTY;   // mina
         case 'H': return TILE_EMPTY;   //oneway atravessavel
         case 'D': return TILE_EMPTY;   //bloco disappearing 
         default : return TILE_EMPTY;
@@ -36,15 +30,9 @@ static int sprite_index_from_char(char c) {
     switch (c) {
         case '#': return TSPR_WALL;
         case '.': return TSPR_FLOOR;
-        case 'P': return TSPR_PATH;
-        case 'X': return TSPR_GRAVE;
         case 'S': return TSPR_FLOOR;  // chão por baixo
         case 'G': return TSPR_GOAL;   // sprite de goal
-        // traps como objeto: desenhamos piso por baixo
-        case 'T': return TSPR_FLOOR;
         case '^': return TSPR_FLOOR;
-        case 'F': return TSPR_FLOOR;
-        case 'M': return TSPR_FLOOR;
         case 'H': return TSPR_FLOOR;
         case 'D': return TSPR_FLOOR;
         default : return TSPR_FLOOR;
@@ -144,21 +132,17 @@ bool level_loader_load(const char* path, Level* out) {
                     break;
 
                 // traps como objetos (piso por baixo)
-                case 'T':   // trap padrão (compat)
                 case '^':   // spike explícito
-                case 'F':   // fogo
-                case 'M':   // mina
                 case 'H':   //oneway atravessavel
-                case 'D':{//disappearing 
+                case 'D':{ //disappearing 
                     Trap trap = (Trap){0};
                     trap.position = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     trap.hitbox   = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
 
-                    if (c == 'F')      trap.type = TRAP_TYPE_FALSE;        // F = Plataforma Falsa
-                    else if (c == 'H') trap.type = TRAP_TYPE_ONEWAY;       // H = One-Way
-                    else if (c == 'D') trap.type = TRAP_TYPE_DISAPPEARING; // D = Bloco que some
-                    else if (c == 'M') trap.type = TRAP_TYPE_MINE;
-                    else               trap.type = TRAP_TYPE_SPIKE;        // T ou ^
+                    if (c == '^') trap.type = TRAP_TYPE_SPIKE;
+                    else if (c == 'H') trap.type = TRAP_TYPE_ONEWAY;
+                    else if (c == 'D') trap.type = TRAP_TYPE_DISAPPEARING;
+
                     trap.active = true;
                     //Inicializar o estado padrão para o bloco D
                     trap.state = TRAP_STATE_ACTIVE;
@@ -171,7 +155,6 @@ bool level_loader_load(const char* path, Level* out) {
                 } break;
 
                 default:
-                    // '.', 'P', 'X' etc: só arte; já setamos colisão/sprite acima
                     break;
             }
         }

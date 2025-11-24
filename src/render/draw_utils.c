@@ -67,9 +67,6 @@ void draw_level_tiles (const Level* level){
             }
         }
     }
-
-    // Goal como overlay simples (debug)
-    DrawRectangleRec(level->goal,(Color){60,200,80,100});
 }
 
 // -----------------------------------------------------------------------------
@@ -83,30 +80,21 @@ void draw_traps(const TrapSet* trapSet){
         if (!t || !t->active) continue;
 
         Color color;
-        
+        Assets* A = GetAssets();
+
         switch (t->type) {
-            //Espinho / Perigo (Vermelho)
+            // Trap dos espinhos
             case TRAP_TYPE_SPIKE:
-            case TRAP_TYPE_FIRE:
-            case TRAP_TYPE_MINE:
-                DrawRectangleRec(t->hitbox, RED);
-                // Triângulo visual
-                DrawTriangle(
-                    (Vector2){t->hitbox.x, t->hitbox.y + t->hitbox.height},
-                    (Vector2){t->hitbox.x + t->hitbox.width, t->hitbox.y + t->hitbox.height},
-                    (Vector2){t->hitbox.x + t->hitbox.width/2, t->hitbox.y},
-                    MAROON
+                DrawTexturePro(
+                    A->spritesheet_atlas,
+                    A->rect_trap_spike,
+                    t->hitbox,
+                    (Vector2){0, 0},
+                    0.0f,
+                    WHITE
                 );
                 break;
-
-            //F:Plataforma Falsa (Roxo Transparente)
-            case TRAP_TYPE_FALSE:
-                color = Fade(PURPLE, 0.5f);
-                DrawRectangleRec(t->hitbox, color);
-                DrawRectangleLinesEx(t->hitbox, 2, PURPLE);
-                DrawText("F", t->hitbox.x + 10, t->hitbox.y + 5, 20, WHITE);
-                break;
-
+                
             //H:One-Way / Atravessável (Azul)
             case TRAP_TYPE_ONEWAY:
                 color = Fade(SKYBLUE, 0.4f);
@@ -118,16 +106,15 @@ void draw_traps(const TrapSet* trapSet){
             //D:Bloco que Some (Laranja)
             case TRAP_TYPE_DISAPPEARING:
                 if (t->state == TRAP_STATE_OFF) {
-                    // Se sumiu: Desenha só o contorno fantasma
-                    DrawRectangleLinesEx(t->hitbox, 1, Fade(ORANGE, 0.3f));
                 } else {
-                    color = ORANGE;
-                    // Se está tremendo (WARNING), pisca branco
-                    if (t->state == TRAP_STATE_WARNING) {
-                        if (((int)(GetTime() * 15)) % 2 == 0) color = WHITE;
-                    }
-                    DrawRectangleRec(t->hitbox, color);
-                    DrawRectangleLinesEx(t->hitbox, 2, DARKBROWN);
+                    DrawTexturePro(
+                        A->spritesheet_atlas,
+                        A->rect_trap_false,
+                        t->hitbox,
+                        (Vector2){0, 0},
+                        0.0f,
+                        WHITE
+                    );
                 }
                 break;
             default:
@@ -226,4 +213,23 @@ void draw_hud(const Player* player, const Level* level,const InputState* input){
 
     DrawText(TextFormat("Nível: %d", progress_get_current_level()), 
         GetScreenWidth() - 100, 12, 18, DARKGRAY);
+}
+// -----------------------------------------------------------------------------
+// Goal
+// -----------------------------------------------------------------------------
+void draw_goal(const Level* level) {
+    if (!level) return;
+    
+    Assets* A = GetAssets();
+    
+    if (A && A->spritesheet_atlas.id && A->rect_goal_door.width > 0 && A->rect_goal_door.height > 0) {
+        DrawTexturePro(
+            A->spritesheet_atlas,
+            A->rect_goal_door,
+            level->goal,
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
+    }
 }
