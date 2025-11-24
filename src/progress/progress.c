@@ -1,9 +1,11 @@
 #include "progress.h"
-#include <stdio.h>  // Necessário para FILE, fopen, etc.
+#include <stdio.h> 
 #include <raylib.h>
 
-static int g_current_level_id = 1;      // Nível selecionado
-static int g_max_unlocked_level = 1;    // Até onde o jogador chegou
+static int g_current_level_id = 1;      //Nível selecionado
+static int g_max_unlocked_level = 1;    //Até onde o jogador chegou
+static int g_total_deaths = 0;          //Contador de mortes
+
 static const char *SAVE_FILE = "savegame.dat";
 
 void progress_init(void) {
@@ -11,15 +13,21 @@ void progress_init(void) {
     FILE *file = fopen(SAVE_FILE, "r");
     
     if (file != NULL) {
-        if (fscanf(file, "%d", &g_max_unlocked_level) != 1) {
-            g_max_unlocked_level = 1; // Erro na leitura, reseta
+        int read_count = fscanf(file, "%d %d", &g_max_unlocked_level, &g_total_deaths);
+
+        if (read_count < 1) {
+            g_max_unlocked_level = 1; // Arquivo vazio ou corrompido
+            g_total_deaths = 0;
         }
+        
         fclose(file);
-        TraceLog(LOG_INFO, "[Progress] Save carregado. Max Level: %d", g_max_unlocked_level);
+        TraceLog(LOG_INFO, "[Progress] Save carregado. Max Level: %d, Mortes: %d", g_max_unlocked_level, g_total_deaths);
     } else {
         g_max_unlocked_level = 1; // Começa do zero
+        g_total_deaths = 0;
         TraceLog(LOG_INFO, "[Progress] Novo jogo iniciado.");
     }
+    
     // Garante que não ultrapasse o limite
     if (g_max_unlocked_level > MAX_LEVELS_SUPPORTED) {
         g_max_unlocked_level = MAX_LEVELS_SUPPORTED;
@@ -29,7 +37,7 @@ void progress_init(void) {
 void progress_save(void) {
     FILE *file = fopen(SAVE_FILE, "w");
     if (file != NULL) {
-        fprintf(file, "%d", g_max_unlocked_level);
+        fprintf(file, "%d %d", g_max_unlocked_level, g_total_deaths);
         fclose(file);
         TraceLog(LOG_INFO, "[Progress] Jogo salvo com sucesso!");
     } else {
@@ -62,7 +70,7 @@ void progress_complete_current_level(void) {
         if (g_max_unlocked_level > MAX_LEVELS_SUPPORTED) {
             g_max_unlocked_level = MAX_LEVELS_SUPPORTED;
         }
-        progress_save(); // Salva imediatamente
+        progress_save();
         TraceLog(LOG_INFO, "[Progress] Nova fase liberada: %d", g_max_unlocked_level);
     }
 }
@@ -70,4 +78,13 @@ void progress_complete_current_level(void) {
 bool progress_is_level_completed(int level_id) {
     // Se o nível perguntado for menor que o meu máximo, eu já completei
     return level_id < g_max_unlocked_level;
+}
+
+void progress_add_death(void) {
+    g_total_deaths++;
+    progress_save(); // Salva a cada morte
+}
+
+int progress_get_total_deaths(void) {
+    return g_total_deaths;
 }

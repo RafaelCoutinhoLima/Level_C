@@ -16,5 +16,10 @@ void progress_complete_current_level(void);
 bool progress_is_level_completed(int level_id);
 // Necessária para o map_screen.c saber até onde printar os cadeados nas bloqueadas
 int progress_get_max_unlocked(void);
+//para contar as mortes
+void progress_add_death(void);
+
+//para retornar o valor das mortes
+int progress_get_total_deaths(void);
 
 #endif

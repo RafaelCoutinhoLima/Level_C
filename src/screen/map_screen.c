@@ -7,7 +7,7 @@
 #include <raylib.h>
 #include <math.h> 
 
-//DIMENSÕES CALIBRADAS
+// DIMENSÕES CALIBRADAS
 #define GRAVE_W 117.0f
 #define GRAVE_H 115.0f
 
@@ -26,7 +26,7 @@ static float pulseTimer       = 0.0f;
 static Button btnBackToMenu;
 
 static void SetupNodes(void) {
-    //COORDENADAS EXATAS (TOP-LEFT)
+    //COORDENADAS  das covas para o efeito  (TOP-LEFT)
 
     // FILEIRA 1 (Topo)
     nodes[0] = (LevelNode){1, {213, 269}, NODE_AVAILABLE, false, 1.0f}; 
@@ -39,14 +39,19 @@ static void SetupNodes(void) {
     nodes[5] = (LevelNode){6, {689, 395}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[6] = (LevelNode){7, {459, 395}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // FILEIRA 3 (Baixo)
+    // FILEIRA 3 (Baixo) - As suas coordenadas ajustadas
     nodes[7] = (LevelNode){8, {212, 449}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[8] = (LevelNode){9, {346, 530}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[9] = (LevelNode){10,{572, 530}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // MODO TESTE 
+    //bloqueia as fases que o jogador ainda não desbloqueou
+    int maxUnlocked = progress_get_max_unlocked();
     for(int i=0; i < totalNodes; i++){
-        nodes[i].state = NODE_AVAILABLE; 
+        if (nodes[i].levelId > maxUnlocked) {
+            nodes[i].state = NODE_LOCKED;
+        } else {
+            nodes[i].state = NODE_AVAILABLE;
+        }
     }
 }
 
@@ -61,7 +66,6 @@ void map_screen_init(void) {
     hoveredNodeIndex = -1;
     pulseTimer       = 0.0f;
 
-    // Botão Voltar
     btnBackToMenu = CreateButton(GetScreenWidth() - 220, GetScreenHeight() - 60, 200, 40, "Voltar");
 }
 
@@ -124,15 +128,14 @@ void map_screen_draw(void) {
     ClearBackground(BLACK);
 
     Texture2D bg = GetAssets()->map_background;
-    
-    //Desenha o fundo normal
+    // Desenha o fundo normal
     if (bg.id != 0) {
         Rectangle source = { 0.0f, 0.0f, (float)bg.width, (float)bg.height };
         Rectangle dest   = { 0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight() };
         DrawTexturePro(bg, source, dest, (Vector2){0,0}, 0.0f, WHITE);
     }
 
-    //Efeito de PULO (Zoom)
+    // Efeito de PULO (Zoom)
     for (int i = 0; i < totalNodes; i++) {
         if (nodes[i].state == NODE_LOCKED) continue;
 
@@ -162,8 +165,12 @@ void map_screen_draw(void) {
             DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, WHITE);
         }
     }
+    //SCORE DE MORTES 
+    int deaths = progress_get_total_deaths();
+    DrawText(TextFormat("%d", deaths), 90, 645, 40, WHITE);
 
     DrawButton(btnBackToMenu);
+
     if (fadeAlpha > 0.0f) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, fadeAlpha));
     }

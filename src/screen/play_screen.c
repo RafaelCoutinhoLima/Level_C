@@ -75,6 +75,8 @@ void play_screen_update(float dt) {
     if (gCol.died) {
         audio_play_event(AUDIO_SFX_DIE);
         TraceLog(LOG_INFO, "[Play] morreu -> reset level");
+        progress_add_death(); // Soma +1 morte e salva no arquivo
+        TraceLog(LOG_INFO, "[Play] O jogador morreu. Morte contabilizada.");
         player_reset(&gPlayer, gLevel.spawn);
     }
     if (gCol.reachedGoal) {
