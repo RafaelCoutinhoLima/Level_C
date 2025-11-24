@@ -12,7 +12,7 @@
 #define GRAVE_H 115.0f
 
 #define FADE_SPEED  3.0f
-#define ANIM_SPEED  6.0f // Velocidade do pulo
+#define ANIM_SPEED  6.0f 
 
 static LevelNode nodes[MAX_MAP_NODES];
 static int  totalNodes        = 10;
@@ -24,18 +24,17 @@ static int   nextLevelId      = -1;
 static float pulseTimer       = 0.0f; 
 
 static Button btnBackToMenu;
-static Button btnMusic;
 
 static void SetupNodes(void) {
     //COORDENADAS EXATAS (TOP-LEFT)
 
-    // FILEIRA 1 (Topo - OK)
+    // FILEIRA 1 (Topo)
     nodes[0] = (LevelNode){1, {213, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[1] = (LevelNode){2, {456, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[2] = (LevelNode){3, {673, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[3] = (LevelNode){4, {888, 269}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // FILEIRA 2 (Meio - OK)
+    // FILEIRA 2 (Meio)
     nodes[4] = (LevelNode){5, {906, 395}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[5] = (LevelNode){6, {689, 395}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[6] = (LevelNode){7, {459, 395}, NODE_AVAILABLE, false, 1.0f}; 
@@ -45,7 +44,7 @@ static void SetupNodes(void) {
     nodes[8] = (LevelNode){9, {346, 530}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[9] = (LevelNode){10,{572, 530}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // MODO TESTE (Tudo liberado)
+    // MODO TESTE 
     for(int i=0; i < totalNodes; i++){
         nodes[i].state = NODE_AVAILABLE; 
     }
@@ -62,8 +61,8 @@ void map_screen_init(void) {
     hoveredNodeIndex = -1;
     pulseTimer       = 0.0f;
 
+    // Botão Voltar
     btnBackToMenu = CreateButton(GetScreenWidth() - 220, GetScreenHeight() - 60, 200, 40, "Voltar");
-    btnMusic      = CreateButton(20, 20, 150, 30, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
 }
 
 void map_screen_update(float dt) {
@@ -92,7 +91,6 @@ void map_screen_update(float dt) {
 
     hoveredNodeIndex = -1;
     for (int i = 0; i < totalNodes; i++) {
-        // Colisão retangular precisa
         Rectangle nodeRect = {
             nodes[i].position.x, 
             nodes[i].position.y, 
@@ -103,8 +101,6 @@ void map_screen_update(float dt) {
         if (CheckCollisionPointRec(mousePos, nodeRect)) {
             hoveredNodeIndex = i;
             nodes[i].isHovered = true;
-            
-            // Animação de Zoom
             if (nodes[i].animScale < 1.1f) nodes[i].animScale += ANIM_SPEED * dt;
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -115,17 +111,12 @@ void map_screen_update(float dt) {
             }
         } else {
             nodes[i].isHovered = false;
-            // Volta ao normal
             if (nodes[i].animScale > 1.0f) nodes[i].animScale -= ANIM_SPEED * dt;
         }
     }
 
     if (!isFadingOut) {
         if (UpdateButton(&btnBackToMenu)) state_change(SCREEN_HOME);
-        if (UpdateButton(&btnMusic)) {
-            audio_toggle_music();
-            update_music_button_label();  // <<< AQUI estava o bug: corrigido OFF/ON
-        }
     }
 }
 
@@ -134,7 +125,7 @@ void map_screen_draw(void) {
 
     Texture2D bg = GetAssets()->map_background;
     
-    //Desenha o fundo completo
+    //Desenha o fundo normal
     if (bg.id != 0) {
         Rectangle source = { 0.0f, 0.0f, (float)bg.width, (float)bg.height };
         Rectangle dest   = { 0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight() };
@@ -148,7 +139,6 @@ void map_screen_draw(void) {
         if (nodes[i].isHovered && bg.id != 0) {
             float scale = nodes[i].animScale; 
 
-            // Conversão de escala Tela -> Imagem Original
             float scaleX = (float)bg.width / GetScreenWidth();
             float scaleY = (float)bg.height / GetScreenHeight();
 
@@ -169,15 +159,11 @@ void map_screen_draw(void) {
                 newH
             };
 
-            // Desenha o recorte "pulando"
             DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, WHITE);
-            
         }
     }
 
     DrawButton(btnBackToMenu);
-    DrawButton(btnMusic);
-
     if (fadeAlpha > 0.0f) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, fadeAlpha));
     }
