@@ -1,5 +1,3 @@
-// src/render/draw_utils.c
-
 #include "render/draw_utils.h"
 #include <raylib.h>
 #include <stdio.h>

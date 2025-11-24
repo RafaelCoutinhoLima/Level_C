@@ -124,7 +124,7 @@ void map_screen_update(float dt) {
         if (UpdateButton(&btnBackToMenu)) state_change(SCREEN_HOME);
         if (UpdateButton(&btnMusic)) {
             audio_toggle_music();
-            SetButtonText(&btnMusic, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
+            update_music_button_label();  // <<< AQUI estava o bug: corrigido OFF/ON
         }
     }
 }

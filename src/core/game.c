@@ -1,4 +1,3 @@
-// src/core/game.c
 #include "game.h"
 #include "core/state.h"
 #include <raylib.h>

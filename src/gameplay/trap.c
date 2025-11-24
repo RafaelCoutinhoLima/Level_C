@@ -59,21 +59,5 @@ void trap_set_update(TrapSet* set, float dt) {
     for (size_t i = 0; i < set->count; i++) {
         Trap* t = &set->traps[i];
         if (!t->active) continue;
-        //Bloco Temporário (D)
-        if (t->type == TRAP_TYPE_DISAPPEARING) {
-            if (t->state == TRAP_STATE_WARNING) {
-                t->timer -= dt;
-                if (t->timer <= 0.0f) {
-                    t->state = TRAP_STATE_OFF; // Desaparece
-                    t->timer = 2.5f;           // Tempo para voltar (respawn)
-                }
-            }
-            else if (t->state == TRAP_STATE_OFF) {
-                t->timer -= dt;
-                if (t->timer <= 0.0f) {
-                    t->state = TRAP_STATE_ACTIVE; // Reaparece
-                }
-            }
-        }
     }
 }

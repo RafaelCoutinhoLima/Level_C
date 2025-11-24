@@ -1,4 +1,3 @@
-// src/screen/play_screen.c
 #include "play_screen.h"
 #include "levels/level_loader.h"
 #include "io/input.h"
@@ -52,7 +51,7 @@ void play_screen_init(void) {
     gCamera.target  = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
     gCamera.offset  = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     gCamera.rotation= 0.0f;
-    gCamera.zoom    = 2.0f;
+    gCamera.zoom    = 1.3f;
 }
 
 void play_screen_update(float dt) {
