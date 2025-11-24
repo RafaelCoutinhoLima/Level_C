@@ -5,75 +5,68 @@
 #include "progress/progress.h"
 #include "io/audio.h"
 #include <raylib.h>
-#include <stdio.h>
 
-// --- Configs visuais do mapa de fases (se você já tinha outra versão, mantenha sua lógica) ---
 #define NODE_RADIUS 25.0f
 #define FADE_SPEED  3.0f
 #define ANIM_SPEED  4.0f
 
-// Se você já possui LevelNode/estados em outro header, use-os daqui.
-// Aqui vai um stub simples para manter o arquivo autossuficiente:
-typedef enum { NODE_LOCKED, NODE_AVAILABLE, NODE_COMPLETED } NodeState;
-typedef struct {
-    int levelId;
-    Vector2 position;
-    NodeState state;
-    float animScale;
-    bool isHovered;
-} LevelNode;
-
-#define MAX_MAP_NODES 5
-
 static LevelNode nodes[MAX_MAP_NODES];
-static int  totalNodes = 5;
-static int  hoveredNodeIndex = -1;
+static int  totalNodes        = 5;
+static int  hoveredNodeIndex  = -1;
 
-// --- Fade/Transição ---
-static float fadeAlpha = 1.0f;
-static bool  isFadingOut = false;
-static int   nextLevelId = -1;
+static float fadeAlpha        = 1.0f;
+static bool  isFadingOut      = false;
+static int   nextLevelId      = -1;
 
-// --- Botões ---
 static Button btnBackToMenu;
 static Button btnMusic;
 
-// --- Helpers ---
 static void SetupNodes(void) {
-    nodes[0] = (LevelNode){ .levelId=1, .position={150,300}, .state=NODE_COMPLETED, .animScale=1.0f };
-    nodes[1] = (LevelNode){ .levelId=2, .position={280,200}, .state=NODE_AVAILABLE, .animScale=1.0f };
-    nodes[2] = (LevelNode){ .levelId=3, .position={410,300}, .state=NODE_LOCKED,    .animScale=1.0f };
-    nodes[3] = (LevelNode){ .levelId=4, .position={540,200}, .state=NODE_LOCKED,    .animScale=1.0f };
-    nodes[4] = (LevelNode){ .levelId=5, .position={670,300}, .state=NODE_LOCKED,    .animScale=1.0f };
+    nodes[0].levelId   = 1;
+    nodes[0].position  = (Vector2){150, 300};
+    nodes[0].state     = NODE_COMPLETED;
+    nodes[0].animScale = 1.0f;
+
+    nodes[1].levelId   = 2;
+    nodes[1].position  = (Vector2){280, 200};
+    nodes[1].state     = NODE_AVAILABLE;
+    nodes[1].animScale = 1.0f;
+
+    nodes[2].levelId   = 3;
+    nodes[2].position  = (Vector2){410, 300};
+    nodes[2].state     = NODE_LOCKED;
+    nodes[2].animScale = 1.0f;
+
+    nodes[3].levelId   = 4;
+    nodes[3].position  = (Vector2){540, 200};
+    nodes[3].state     = NODE_LOCKED;
+    nodes[3].animScale = 1.0f;
+
+    nodes[4].levelId   = 5;
+    nodes[4].position  = (Vector2){670, 300};
+    nodes[4].state     = NODE_LOCKED;
+    nodes[4].animScale = 1.0f;
 }
 
-static void update_music_button_label(void) {
-    SetButtonText(&btnMusic, audio_is_music_on() ? "Música: ON (M)" : "Música: OFF (M)");
-}
-
-// --- Ciclo de vida da tela ---
-void map_screen_init(void){
+void map_screen_init(void) {
     TraceLog(LOG_INFO, "[Map] Init");
-
-    // Garante áudio inicializado (idempotente)
     audio_init();
-
     SetupNodes();
 
-    fadeAlpha     = 1.0f;
-    isFadingOut   = false;
-    nextLevelId   = -1;
+    fadeAlpha        = 1.0f;
+    isFadingOut      = false;
+    nextLevelId      = -1;
     hoveredNodeIndex = -1;
 
     btnBackToMenu = CreateButton(-1, 520, 200, 40, "Voltar ao Menu");
-    btnMusic      = CreateButton(20,  20, 150, 30, "Música: ...");
-    update_music_button_label(); // rótulo conforme estado atual
+    btnMusic      = CreateButton(20, 20, 150, 30, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
 }
 
-void map_screen_update(float dt){
+void map_screen_update(float dt) {
     audio_update();
 
-    // Fade
+    Vector2 mousePos = GetMousePosition();
+
     if (!isFadingOut) {
         if (fadeAlpha > 0.0f) {
             fadeAlpha -= FADE_SPEED * dt;
@@ -91,25 +84,16 @@ void map_screen_update(float dt){
         }
     }
 
-    // Atalho de teclado para alternar música (M)
-    if (IsKeyPressed(KEY_M)) {
-        audio_toggle_music();
-        update_music_button_label();
-    }
-
-    // Se estiver no fade-out, bloqueia interação
     if (fadeAlpha > 0.1f && isFadingOut) return;
 
-    // Hover/check de nós
-    Vector2 mousePos = GetMousePosition();
     hoveredNodeIndex = -1;
 
     for (int i = 0; i < totalNodes; i++) {
-        bool hover = CheckCollisionPointCircle(mousePos, nodes[i].position, NODE_RADIUS);
-        nodes[i].isHovered = hover;
-        if (hover) {
+        if (CheckCollisionPointCircle(mousePos, nodes[i].position, NODE_RADIUS)) {
             hoveredNodeIndex = i;
+            nodes[i].isHovered = true;
             if (nodes[i].animScale < 1.2f) nodes[i].animScale += ANIM_SPEED * dt;
+
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if (nodes[i].state != NODE_LOCKED) {
                     nextLevelId = nodes[i].levelId;
@@ -117,11 +101,11 @@ void map_screen_update(float dt){
                 }
             }
         } else {
+            nodes[i].isHovered = false;
             if (nodes[i].animScale > 1.0f) nodes[i].animScale -= ANIM_SPEED * dt;
         }
     }
 
-    // Botões (só se não estiver saindo)
     if (!isFadingOut) {
         if (UpdateButton(&btnBackToMenu)) {
             state_change(SCREEN_HOME);
@@ -129,30 +113,30 @@ void map_screen_update(float dt){
 
         if (UpdateButton(&btnMusic)) {
             audio_toggle_music();
-            update_music_button_label();
+            SetButtonText(&btnMusic, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
         }
     }
 }
 
-void map_screen_draw(void){
+void map_screen_draw(void) {
     ClearBackground((Color){20, 30, 20, 255});
 
-    // Conexões
     for (int i = 0; i < totalNodes - 1; i++) {
         DrawLineEx(nodes[i].position, nodes[i+1].position, 4.0f, DARKGRAY);
     }
 
-    // Nós
     for (int i = 0; i < totalNodes; i++) {
-        Color coreColor, ringColor = WHITE;
-        switch(nodes[i].state) {
+        Color coreColor;
+        Color ringColor = WHITE;
+        switch (nodes[i].state) {
             case NODE_LOCKED:    coreColor = (Color){80, 80, 80, 255}; ringColor = GRAY; break;
             case NODE_AVAILABLE: coreColor = (Color){0, 121, 241, 255}; break;
             case NODE_COMPLETED: coreColor = (Color){253, 249, 0, 255}; break;
         }
-        float r = NODE_RADIUS * nodes[i].animScale;
-        DrawCircleV(nodes[i].position, r + 3, ringColor);
-        DrawCircleV(nodes[i].position, r, coreColor);
+
+        float finalRadius = NODE_RADIUS * nodes[i].animScale;
+        DrawCircleV(nodes[i].position, finalRadius + 3, ringColor);
+        DrawCircleV(nodes[i].position, finalRadius, coreColor);
 
         DrawText(TextFormat("%d", nodes[i].levelId),
                  (int)nodes[i].position.x - 5,
@@ -160,19 +144,20 @@ void map_screen_draw(void){
                  20, BLACK);
     }
 
-    // Tooltip simples
-    if (hoveredNodeIndex != -1) {
+    if (hoveredNodeIndex != -1 && nodes[hoveredNodeIndex].state != NODE_LOCKED) {
+        LevelNode *n = &nodes[hoveredNodeIndex];
+        int tx = (int)n->position.x + 20;
+        int ty = (int)n->position.y - 60;
+        DrawRectangle(tx, ty, 220, 50, Fade(BLACK, 0.9f));
+        DrawRectangleLines(tx, ty, 220, 50, WHITE);
+    } else if (hoveredNodeIndex != -1 && nodes[hoveredNodeIndex].state == NODE_LOCKED) {
         int tx = (int)nodes[hoveredNodeIndex].position.x + 20;
         int ty = (int)nodes[hoveredNodeIndex].position.y - 30;
-        Color tip = (nodes[hoveredNodeIndex].state == NODE_LOCKED) ? RED : BLACK;
-        DrawRectangle(tx, ty, 140, 25, Fade(tip, 0.8f));
-        DrawText((nodes[hoveredNodeIndex].state == NODE_LOCKED) ? "BLOQUEADO" : "ENTRAR",
-                 tx + 10, ty + 5, 12, WHITE);
+        DrawRectangle(tx, ty, 100, 25, Fade(RED, 0.8f));
+        DrawText("BLOQUEADO", tx + 10, ty + 5, 10, WHITE);
     }
 
-    DrawText("MAPA DO MUNDO",
-             (GetScreenWidth() - MeasureText("MAPA DO MUNDO", 40))/2, 50, 40, WHITE);
-
+    DrawText("MAPA DO MUNDO", (GetScreenWidth() - MeasureText("MAPA DO MUNDO", 40))/2, 50, 40, WHITE);
     DrawButton(btnBackToMenu);
     DrawButton(btnMusic);
 
@@ -181,11 +166,11 @@ void map_screen_draw(void){
     }
 }
 
-void map_screen_unload(void){
+void map_screen_unload(void) {
     TraceLog(LOG_INFO, "[Map] unload");
 }
 
-GameState map_screen_state(void){
+GameState map_screen_state(void) {
     return (GameState){
         .init   = map_screen_init,
         .update = map_screen_update,
