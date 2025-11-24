@@ -126,7 +126,7 @@ void map_screen_update(float dt) {
 
         if (UpdateButton(&btnMusic)) {
             audio_toggle_music();
-            update_music_button_label();  // <<< AQUI estava o bug: corrigido OFF/ON
+            update_music_button_label();  // mantém rótulo sempre correto
         }
     }
 }
