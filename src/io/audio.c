@@ -1,6 +1,6 @@
 // src/io/audio.c
 #include "audio.h"
-#include "stddef.h"
+#include <stddef.h>
 #include <raylib.h>
 
 // Estado interno do módulo de áudio
@@ -28,23 +28,30 @@ bool audio_init(void) {
         return false;
     }
 
-    // Carrega trilha e efeitos (ajuste caminhos se necessário)
+    // Volume global
+    SetMasterVolume(1.0f);
+
+    // Carrega trilha e efeitos
     G.bg        = LoadMusicStream("assets/audio/bg_main.ogg");
     G.bgLoaded  = (G.bg.stream.buffer != NULL);
-    if (!G.bgLoaded) TraceLog(LOG_WARNING, "[audio] bg_main.ogg não encontrado (sem música)");
+    TraceLog(G.bgLoaded ? LOG_INFO : LOG_WARNING,
+             G.bgLoaded ? "[audio] bg_main.ogg OK" : "[audio] bg_main.ogg não encontrado (sem música)");
 
     G.sfx_die   = LoadSound("assets/audio/die.wav");
     G.dieLoaded = (G.sfx_die.frameCount > 0);
-    if (!G.dieLoaded) TraceLog(LOG_WARNING, "[audio] die.wav não encontrado");
+    TraceLog(G.dieLoaded ? LOG_INFO : LOG_WARNING,
+             G.dieLoaded ? "[audio] die.wav OK" : "[audio] die.wav não encontrado");
 
     G.sfx_goal  = LoadSound("assets/audio/goal.wav");
     G.goalLoaded= (G.sfx_goal.frameCount > 0);
-    if (!G.goalLoaded) TraceLog(LOG_WARNING, "[audio] goal.wav não encontrado");
+    TraceLog(G.goalLoaded ? LOG_INFO : LOG_WARNING,
+             G.goalLoaded ? "[audio] goal.wav OK" : "[audio] goal.wav não encontrado");
 
     if (G.bgLoaded) {
-        SetMusicVolume(G.bg, 0.6f);
+        SetMusicVolume(G.bg, 0.8f);
         PlayMusicStream(G.bg);
         G.musicOn = true;
+        TraceLog(LOG_INFO, "[audio] Música iniciada (ON)");
     } else {
         G.musicOn = false;
     }
@@ -66,11 +73,25 @@ void audio_play_event(AudioEvent e) {
 
     switch (e) {
         case AUDIO_SFX_DIE:
-            if (G.dieLoaded) PlaySound(G.sfx_die);
+            if (G.dieLoaded) {
+                SetSoundVolume(G.sfx_die, 1.0f);
+                PlaySound(G.sfx_die);
+                TraceLog(LOG_INFO, "[audio] play DIE");
+            } else {
+                TraceLog(LOG_WARNING, "[audio] DIE não disponível");
+            }
             break;
+
         case AUDIO_SFX_GOAL:
-            if (G.goalLoaded) PlaySound(G.sfx_goal);
+            if (G.goalLoaded) {
+                SetSoundVolume(G.sfx_goal, 1.0f);
+                PlaySound(G.sfx_goal);
+                TraceLog(LOG_INFO, "[audio] play GOAL");
+            } else {
+                TraceLog(LOG_WARNING, "[audio] GOAL não disponível");
+            }
             break;
+
         default:
             break;
     }
@@ -82,9 +103,11 @@ void audio_toggle_music(void) {
     if (G.musicOn) {
         PauseMusicStream(G.bg);
         G.musicOn = false;
+        TraceLog(LOG_INFO, "[audio] Música pausada (OFF)");
     } else {
         ResumeMusicStream(G.bg);
         G.musicOn = true;
+        TraceLog(LOG_INFO, "[audio] Música retomada (ON)");
     }
 }
 

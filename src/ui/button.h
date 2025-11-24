@@ -1,22 +1,23 @@
+// src/ui/button.h
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "raylib.h"
+#include <raylib.h>
+#include <stdbool.h>
 
-typedef struct{
-    Rectangle bounds;//guarda o tamanho altura ,essas coisas
-    char text[64];
+typedef struct {
+    Rectangle bounds;
+    char  text[64];
     Color baseColor;
     Color hoverColor;
     Color clickColor;
-    bool hovered;
-    bool clicked; //feedback visual do botão
-}Button;
+    bool  hovered;
+    bool  clicked;
+} Button;
 
-Button CreateButton(float x,float y ,float width,float height,const char *text);
-//criando o botão 
-bool UpdateButton(Button *button);
-//para atualizar o estado do botão e saber se parou de precionar e tudo  mais 
-void DrawButton(Button button);
-void SetButtonText(Button *btn, const char *text);
-#endif
+Button CreateButton(float x, float y, float width, float height, const char *text);
+bool   UpdateButton(Button *button);
+void   DrawButton(Button button);
+void   SetButtonText(Button *btn, const char *text);
+
+#endif // BUTTON_H

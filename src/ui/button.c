@@ -1,71 +1,66 @@
+// src/ui/button.c
 #include "button.h"
-#include "raylib.h"
 #include <string.h>
+#include <raylib.h>
 
-Button CreateButton(float x,float y,float width,float height,const char *text){
-    Button button= {0};
-    //zera todos os valores do butão 
-    float posX = (x<0)?(GetScreenWidth()-width)/2.0f :x;
-    float posY = (y<0)?(GetScreenHeight()-height)/2.0f:y;
-    //faz a verificação e centraliza os limites de x e y
-    button.bounds = (Rectangle){posX,posY,width,height};
-    //pegando as dimensões do botão 
-    TextCopy(button.text,text);
+Button CreateButton(float x, float y, float width, float height, const char *text) {
+    Button button = (Button){0};
 
-    button.baseColor=(Color){60,60,60,255};//cinza esscuro
-    button.hoverColor=(Color){100,100,100,255};//cinza medio
-    button.clickColor=(Color){30,30,30,255};//cinza escuro
+    float posX = (x < 0) ? (GetScreenWidth()  - width)  / 2.0f : x;
+    float posY = (y < 0) ? (GetScreenHeight() - height) / 2.0f : y;
 
-    button.hovered =false;
-    button.clicked=false;
+    button.bounds = (Rectangle){ posX, posY, width, height };
+    TextCopy(button.text, text ? text : "");
+
+    button.baseColor  = (Color){ 60,  60,  60, 255 };
+    button.hoverColor = (Color){100, 100, 100, 255 };
+    button.clickColor = (Color){ 30,  30,  30, 255 };
+
+    button.hovered = false;
+    button.clicked = false;
     return button;
 }
-bool UpdateButton(Button *button){
-    Vector2 mousePoint=GetMousePosition();
+
+bool UpdateButton(Button *button) {
+    if (!button) return false;
+
+    Vector2 mousePoint = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mousePoint, button->bounds);
     bool fire = false;
 
-    if (hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+    if (hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         button->clicked = true;
     }
-    
-    if (button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)){
+
+    if (button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         button->clicked = false;
-        if (hovered){
-            fire = true;
-        }
+        if (hovered) fire = true;
     }
 
-    if (!hovered && !IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+    if (!hovered && !IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         button->clicked = false;
     }
 
     button->hovered = hovered;
     return fire;
 }
-void DrawButton(Button button){
-    Color color=button.baseColor;
-    if(button.hovered){
-        color=button.hoverColor;//a cor de quando ta em cima o mouse
-    }
-    if(button.clicked){
-        color=button.clickColor;//cor de quando clica
-    }
-    DrawRectangleRec(button.bounds,color);
-    //desenhar o botão
-    DrawRectangleLinesEx(button.bounds,2,button.hoverColor);// as bordas dos botões
-    //botar o texto no centro
-    int fontSize=20;
-    int textWidth =MeasureText(button.text,fontSize);
-    float textX=button.bounds.x +(button.bounds.width-textWidth)/2.0f;
-    float textY =button.bounds.y+(button.bounds.height-fontSize)/2.0f;
-    
-    DrawText(button.text,(int)textX,(int)textY,fontSize,WHITE);
+
+void DrawButton(Button button) {
+    Color color = button.baseColor;
+    if (button.hovered) color = button.hoverColor;
+    if (button.clicked) color = button.clickColor;
+
+    DrawRectangleRec(button.bounds, color);
+    DrawRectangleLinesEx(button.bounds, 2, button.hoverColor);
+
+    int fontSize = 20;
+    int textWidth = MeasureText(button.text, fontSize);
+    float textX = button.bounds.x + (button.bounds.width  - textWidth) / 2.0f;
+    float textY = button.bounds.y + (button.bounds.height - fontSize)  / 2.0f;
+
+    DrawText(button.text, (int)textX, (int)textY, fontSize, WHITE);
 }
+
 void SetButtonText(Button *btn, const char *text) {
-    if (btn != NULL && text != NULL) {
-        // Copia o texto novo para dentro do botão.
-        // A função TextCopy é da Raylib e evita buffer overflow se o texto for grande.
-        TextCopy(btn->text, text);
-    }
+    if (btn && text) TextCopy(btn->text, text);
 }

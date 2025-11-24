@@ -13,20 +13,18 @@
 #include <raylib.h>
 #include "progress/progress.h"
 #include "io/assets.h"
-#include "io/audio.h"  // << NOVO
+#include "io/audio.h"
 
 static Level gLevel;
 static Player gPlayer;
 static CollisionResult gCol;
 static InputState gInput;
 static Button btnBackToMenu;
-
 static Camera2D gCamera;
 
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
-    // Áudio (idempotente: se já inicializado, só retorna true)
     audio_init();
 
     int level_to_load = progress_get_current_level();
@@ -48,20 +46,16 @@ void play_screen_init(void) {
 
     EnableCursor();
     btnBackToMenu = CreateButton(-1, GetScreenHeight() - 70, 220, 45, "Voltar ao menu");
-    // Configura Câmera
-    float mapWidth = gLevel.width * gLevel.tileSize;
+
+    float mapWidth  = gLevel.width  * gLevel.tileSize;
     float mapHeight = gLevel.height * gLevel.tileSize;
-    // Aponta a câmera para o MEIO do mapa
-    gCamera.target = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
-    // Centraliza esse ponto no MEIO da sua tela
-    gCamera.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    gCamera.rotation = 0.0f;
-    // Zoom de 2.0x (cabe o mapa inteiro na tela de 720p com folga)
-    gCamera.zoom = 2.0f;
+    gCamera.target  = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
+    gCamera.offset  = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    gCamera.rotation= 0.0f;
+    gCamera.zoom    = 2.0f;
 }
 
 void play_screen_update(float dt) {
-    // Mantém streaming da música
     audio_update();
 
     collision_result_reset(&gCol);
@@ -71,7 +65,7 @@ void play_screen_update(float dt) {
     physics_update(&gPlayer, &gInput, dt);
     player_update_hitbox(&gPlayer);
     physics_apply_level_bounds(&gPlayer, &gLevel);
-    // atualizar o bloco q some
+
     trap_set_update(&gLevel.trapSet, dt);
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);
@@ -80,14 +74,12 @@ void play_screen_update(float dt) {
     player_anim_update(&gPlayer, dt);
 
     if (gCol.died) {
-        audio_play_event(AUDIO_SFX_DIE);  // << NOVO
+        audio_play_event(AUDIO_SFX_DIE);
         TraceLog(LOG_INFO, "[Play] morreu -> reset level");
         player_reset(&gPlayer, gLevel.spawn);
-        TraceLog(LOG_INFO, "[Play] ciclo: reset -> spawn -> limpeza de velocidade");
-        
     }
     if (gCol.reachedGoal) {
-        audio_play_event(AUDIO_SFX_GOAL); // << NOVO
+        audio_play_event(AUDIO_SFX_GOAL);
         TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
         progress_complete_current_level();
         state_change(SCREEN_MAP);
@@ -102,19 +94,16 @@ void play_screen_update(float dt) {
 
 void play_screen_draw(void) {
     ClearBackground(RAYWHITE);
+
     BeginMode2D(gCamera);
-    // 1) mapa completo via atlas (usa Level->sprites[][])
     draw_level_map(&gLevel);
-
-    // 2) sólidos por cima (mantém visual coerente com colisão)
     draw_level_tiles(&gLevel);
-
-    // 3) restante
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
+    EndMode2D();
+
     draw_hud(&gPlayer, &gLevel, &gInput);
     DrawButton(btnBackToMenu);
-    EndMode2D();
 }
 
 void play_screen_unload(void) {
