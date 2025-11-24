@@ -305,9 +305,8 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                         result->hitGround = true;
                         // Ativa o timer se estiver sólido
                         if (trap->state == TRAP_STATE_ACTIVE) {
-                            trap->state = TRAP_STATE_WARNING;
-                            trap->timer = 1.0f; // 1 segundo tremendo antes de sumir
-                            TraceLog(LOG_INFO, "Bloco D ativado! idx=%zu", i);
+                            trap->state = TRAP_STATE_OFF;
+                            TraceLog(LOG_INFO, "Bloco D desapareceu! idx=%zu", i);
                         }
                     }
                 } break;
