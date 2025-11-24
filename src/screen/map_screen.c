@@ -48,9 +48,13 @@ static void SetupNodes(void) {
     nodes[4].animScale = 1.0f;
 }
 
+static void update_music_button_label(void) {
+    SetButtonText(&btnMusic, audio_is_music_on() ? "Musica: ON (M)" : "Musica: OFF (M)");
+}
+
 void map_screen_init(void) {
     TraceLog(LOG_INFO, "[Map] Init");
-    audio_init();
+    audio_init();        // garante dispositivo e música/sfx prontos
     SetupNodes();
 
     fadeAlpha        = 1.0f;
@@ -59,14 +63,14 @@ void map_screen_init(void) {
     hoveredNodeIndex = -1;
 
     btnBackToMenu = CreateButton(-1, 520, 200, 40, "Voltar ao Menu");
-    btnMusic      = CreateButton(20, 20, 150, 30, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
+    btnMusic      = CreateButton(20, 20, 150, 30, "Musica: ...");
+    update_music_button_label();  // texto correto conforme estado atual
 }
 
 void map_screen_update(float dt) {
     audio_update();
 
-    Vector2 mousePos = GetMousePosition();
-
+    // Fade-in/out
     if (!isFadingOut) {
         if (fadeAlpha > 0.0f) {
             fadeAlpha -= FADE_SPEED * dt;
@@ -84,9 +88,17 @@ void map_screen_update(float dt) {
         }
     }
 
+    // Atalho de teclado para alternar música
+    if (IsKeyPressed(KEY_M)) {
+        audio_toggle_music();
+        update_music_button_label();
+    }
+
     if (fadeAlpha > 0.1f && isFadingOut) return;
 
+    // Interação com nós do mapa
     hoveredNodeIndex = -1;
+    Vector2 mousePos = GetMousePosition();
 
     for (int i = 0; i < totalNodes; i++) {
         if (CheckCollisionPointCircle(mousePos, nodes[i].position, NODE_RADIUS)) {
@@ -106,6 +118,7 @@ void map_screen_update(float dt) {
         }
     }
 
+    // Botões (se não estiver saindo)
     if (!isFadingOut) {
         if (UpdateButton(&btnBackToMenu)) {
             state_change(SCREEN_HOME);
@@ -113,7 +126,7 @@ void map_screen_update(float dt) {
 
         if (UpdateButton(&btnMusic)) {
             audio_toggle_music();
-            SetButtonText(&btnMusic, audio_is_music_on() ? "Musica: ON" : "Musica: OFF");
+            update_music_button_label();  // <<< AQUI estava o bug: corrigido OFF/ON
         }
     }
 }
@@ -121,10 +134,12 @@ void map_screen_update(float dt) {
 void map_screen_draw(void) {
     ClearBackground((Color){20, 30, 20, 255});
 
+    // ligações entre nós
     for (int i = 0; i < totalNodes - 1; i++) {
         DrawLineEx(nodes[i].position, nodes[i+1].position, 4.0f, DARKGRAY);
     }
 
+    // nós
     for (int i = 0; i < totalNodes; i++) {
         Color coreColor;
         Color ringColor = WHITE;
@@ -144,6 +159,7 @@ void map_screen_draw(void) {
                  20, BLACK);
     }
 
+    // tooltip simples
     if (hoveredNodeIndex != -1 && nodes[hoveredNodeIndex].state != NODE_LOCKED) {
         LevelNode *n = &nodes[hoveredNodeIndex];
         int tx = (int)n->position.x + 20;
@@ -157,7 +173,8 @@ void map_screen_draw(void) {
         DrawText("BLOQUEADO", tx + 10, ty + 5, 10, WHITE);
     }
 
-    DrawText("MAPA DO MUNDO", (GetScreenWidth() - MeasureText("MAPA DO MUNDO", 40))/2, 50, 40, WHITE);
+    DrawText("MAPA DO MUNDO",
+             (GetScreenWidth() - MeasureText("MAPA DO MUNDO", 40))/2, 50, 40, WHITE);
     DrawButton(btnBackToMenu);
     DrawButton(btnMusic);
 
