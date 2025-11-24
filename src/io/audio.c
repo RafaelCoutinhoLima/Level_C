@@ -8,7 +8,7 @@
 #define MUSIC_VOL  1.0f
 #define SFX_VOL    1.0f
 
-typedef struct {
+typedef struct AudioState{
     bool initialized;
     bool musicOn;
 
@@ -54,7 +54,7 @@ bool audio_init(void) {
 
     SetMasterVolume(MASTER_VOL);
 
-    const char* PATH_MUSIC = "assets/audio/bg_main.ogg";
+    const char* PATH_MUSIC = "assets/audio/bg_main.mp3";
     const char* PATH_DIE   = "assets/audio/die.wav";
     const char* PATH_GOAL  = "assets/audio/goal.wav";
 
@@ -65,7 +65,7 @@ bool audio_init(void) {
 
     // carrega
     G.bg = load_music_multitry(PATH_MUSIC);
-    G.bgLoaded = (G.bg.stream.buffer != NULL);
+    G.bgLoaded = (G.bg.ctxData != NULL);
     TraceLog(G.bgLoaded ? LOG_INFO : LOG_WARNING,
              G.bgLoaded ? "[audio] bg_main.ogg OK" : "[audio] bg_main.ogg NAO carregado");
 
