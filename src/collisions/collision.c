@@ -240,21 +240,25 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
     if (!player || !trapSet || !result) return;
 
     Rectangle pRect = player_get_bounds(player);
-    // Tolerância para subir na plataforma One-Way (pixels)
     const float kOneWayThreshold = 8.0f;
 
     for (size_t i = 0; i < trapSet->count; i++) {
-        // Usamos get_mutable para poder alterar o estado do Bloco D
         Trap* trap = trap_set_get_mutable(trapSet, i);
         if (!trap || !trap->active) continue;
 
-        // Bloco D "OFF" é invisível e intangível
         if (trap->type == TRAP_TYPE_DISAPPEARING && trap->state == TRAP_STATE_OFF) continue;
 
-        // Verifica colisão básica AABB
-        if (CheckCollisionRecs(pRect, trap->hitbox)) {
+        Rectangle effectiveHitbox = trap->hitbox;
+        if (trap->type == TRAP_TYPE_SPIKE) {
+            float marginX = 6.0f;     // "Folga" lateral (o jogador pode pisar um pouquinho na borda)
+            float heightRatio = 0.5f; // Altura do espinho (0.5 = metade do bloco)
+            effectiveHitbox.x += marginX;
+            effectiveHitbox.width -= (marginX * 2);
+            effectiveHitbox.y += (effectiveHitbox.height * (1.0f - heightRatio));
+            effectiveHitbox.height *= heightRatio;
+        }
+        if (CheckCollisionRecs(pRect, effectiveHitbox)) {
             switch (trap->type) {
-                //MORTAL (Espinhos, Fogo)
                 case TRAP_TYPE_SPIKE:
                     result->hitTrap = true;
                     result->died = true;
@@ -262,15 +266,14 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     TraceLog(LOG_INFO, "Player morreu em espinho!");
                     break;
                     
-                //ONE-WAY (H)
                 case TRAP_TYPE_ONEWAY: {
                     bool isFalling = player->velocity.y > 0;
                     float feetY = pRect.y + pRect.height;
-                    float trapTop = trap->hitbox.y;
+                    float trapTop = trap->hitbox.y; 
                     bool isAbove = (feetY <= trapTop + kOneWayThreshold + (player->velocity.y * GetFrameTime()));
 
                     if (isFalling && isAbove) {
-                        player->position.y = trap->hitbox.y;
+                        player->position.y = trap->hitbox.y; // Mantém posição original
                         player_update_hitbox(player);
                         player->velocity.y = 0.0f;
                         player->isOnGround = true;
@@ -278,7 +281,6 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     }
                 } break;
 
-                //BLOCO TEMPORÁRIO (D)
                 case TRAP_TYPE_DISAPPEARING: {
                     float feetY = pRect.y + pRect.height;
                     float overlapY = feetY - trap->hitbox.y;
