@@ -25,12 +25,13 @@ static Camera2D gCamera;
 void play_screen_init(void) {
     TraceLog(LOG_INFO, "[play] init");
 
-    // Garante áudio ativo (idempotente)
-    audio_init();
+    audio_init(); 
+    audio_stop_music(); 
 
     int level_to_load = progress_get_current_level();
     if (!level_load_by_id(&gLevel, level_to_load)) {
-        TraceLog(LOG_ERROR, "[Play] Falha ao carregar nível %d, voltando ao mapa", level_to_load);
+        TraceLog(LOG_ERROR, "[Play] Falha ao carregar nível %d", level_to_load);
+        audio_play_music(); 
         state_change(SCREEN_MAP);
         return;
     }
@@ -53,27 +54,25 @@ void play_screen_init(void) {
     gCamera.target  = (Vector2){ mapWidth / 2.0f, mapHeight / 2.0f };
     gCamera.offset  = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     gCamera.rotation= 0.0f;
-    gCamera.zoom    = 1.3f; // ajuste fino se quiser aproximar/afastar
+    gCamera.zoom    = 1.3f; 
 }
 
 void play_screen_update(float dt) {
-    // Mantém streaming da música
     audio_update();
 
-    // Toggle de música também aqui (atalho M)
-    if (IsKeyPressed(KEY_M)) {
-        audio_toggle_music();
+    collision_result_reset(&gCol);
+    input_update_player(&gInput);
+
+    // Som de Pulo
+    if (IsKeyPressed(KEY_SPACE) && gPlayer.isOnGround) {
+        audio_play_event(AUDIO_SFX_JUMP);
     }
 
-    collision_result_reset(&gCol);
-
-    input_update_player(&gInput);
     player_apply_input(&gPlayer, &gInput, dt);
     physics_update(&gPlayer, &gInput, dt);
     player_update_hitbox(&gPlayer);
     physics_apply_level_bounds(&gPlayer, &gLevel);
 
-    // Traps com comportamento (se houver)
     trap_set_update(&gLevel.trapSet, dt);
 
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
@@ -84,22 +83,22 @@ void play_screen_update(float dt) {
 
     if (gCol.died) {
         audio_play_event(AUDIO_SFX_DIE);
-        TraceLog(LOG_INFO, "[Play] morreu -> reset level");
-        progress_add_death(); // Soma +1 morte e salva no arquivo
-        TraceLog(LOG_INFO, "[Play] O jogador morreu. Morte contabilizada.");
+        progress_add_death(); 
         player_reset(&gPlayer, gLevel.spawn);
     }
 
     if (gCol.reachedGoal) {
+        TraceLog(LOG_INFO, "[Play] GOAL! Trocando de fase...");
+        
         audio_play_event(AUDIO_SFX_GOAL);
-        TraceLog(LOG_INFO, "[Play] chegou no goal -> completar progresso e trocar de tela");
         progress_complete_current_level();
+        
+        audio_play_music();
         state_change(SCREEN_MAP);
         return;
     }
-
     if (UpdateButton(&btnBackToMenu)) {
-        TraceLog(LOG_INFO, "[Play] voltar ao menu");
+        audio_play_music(); 
         state_change(SCREEN_MAP);
         return;
     }
@@ -107,7 +106,6 @@ void play_screen_update(float dt) {
 
 void play_screen_draw(void) {
     ClearBackground(RAYWHITE);
-
     BeginMode2D(gCamera);
     draw_level_map(&gLevel);
     draw_level_tiles(&gLevel);
@@ -115,8 +113,7 @@ void play_screen_draw(void) {
     draw_traps(&gLevel.trapSet);
     draw_player(&gPlayer);
     EndMode2D();
-
-    // HUD e UI (fora da câmera)
+    
     draw_hud(&gPlayer, &gLevel, &gInput);
     DrawButton(btnBackToMenu);
 }

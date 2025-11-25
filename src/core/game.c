@@ -1,16 +1,14 @@
-// src/core/game.c
 #include "game.h"
 #include "core/state.h"
 #include <raylib.h>
 #include <stdbool.h>
-
 #include "screen/play_screen.h"
 #include "screen/home_screen.h"
 #include "screen/map_screen.h"
 #include "progress/progress.h"
 #include "io/input.h"
 #include "io/assets.h"
-#include "io/audio.h"
+#include "io/audio.h" 
 
 #define SCREEN_WIDTH  1280
 #define SCREEN_HEIGHT 720
@@ -33,8 +31,8 @@ bool game_init(void) {
         return false;
     }
 
-    // Áudio: tenta iniciar (se os arquivos não existirem, só dá warning)
     audio_init();
+    audio_play_music(); 
 
     state_init_manager();
     progress_init();
@@ -53,8 +51,7 @@ void game_loop(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
-        // Mantém streaming da música tocando certinho
-        audio_update();
+        audio_update(); 
 
         state_update(dt);
 
