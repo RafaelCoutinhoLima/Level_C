@@ -14,7 +14,7 @@
 
 #define SCREEN_WIDTH  1280
 #define SCREEN_HEIGHT 720
-#define GAME_TITLE    "Level C Game"
+#define GAME_TITLE    "Level C"
 #define TARGET_FPS    60
 
 bool game_init(void) {
