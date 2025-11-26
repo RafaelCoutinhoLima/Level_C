@@ -1,4 +1,4 @@
-![Menu Principal](https://github.com/user-attachments/assets/510acc7e-fecd-472e-80f3-ff09faf94fd0)
+![Menu Principal](assets/screenshots/level.png)
 # 😈 Level C
 
 **"Um remake 2D do 'Level Devil' (mas em C)"**
