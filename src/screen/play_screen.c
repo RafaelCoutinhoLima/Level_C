@@ -114,8 +114,6 @@ void play_screen_draw(void) {
     draw_player(&gPlayer);
     EndMode2D();
     
-    draw_hud(&gPlayer, &gLevel, &gInput);
-    
     Rectangle r = btnBackToMenu.bounds;
     bool hover = btnBackToMenu.hovered;
 

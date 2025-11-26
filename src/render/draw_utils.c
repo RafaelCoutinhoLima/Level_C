@@ -174,28 +174,6 @@ static const char* GetPlayerStateName(const Player* player){
         return "caindo";
     }
 }
-
-// HUD
-void draw_hud(const Player* player, const Level* level,const InputState* input){
-    if (!player || !level || !input) return;
-
-    DrawText(TextFormat("pos(%.1f, %.1f) vel(%.1f, %.1f) traps=%zu", 
-        player->position.x, player->position.y, 
-        player->velocity.x, player->velocity.y, 
-        level->trapSet.count), 
-        12, 12, 18, LIGHTGRAY);
-
-    DrawText(TextFormat("Estado: %s", GetPlayerStateName(player)),
-        12, 32, 18, LIME);
-
-    DrawText(TextFormat("Input: Eixo[%.1f] Pulo[%d]", input->moveAxis, input->jumpHeld),
-        12, 52, 18, LIME);
-        
-    DrawText("ESC: voltar ao menu", 12, 76, 16, LIGHTGRAY);
-
-    DrawText(TextFormat("Nível: %d", progress_get_current_level()), 
-        GetScreenWidth() - 100, 12, 18, DARKGRAY);
-}
 // Goal
 void draw_goal(const Level* level) {
     if (!level) return;
