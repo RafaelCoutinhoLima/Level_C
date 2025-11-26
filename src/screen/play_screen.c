@@ -46,7 +46,12 @@ void play_screen_init(void) {
     input_init();
 
     EnableCursor();
-    btnBackToMenu = CreateButton(-1, GetScreenHeight() - 70, 220, 45, "Voltar ao menu");
+
+    int btnW = 220;
+    int btnH = 45;
+    int btnX = (GetScreenWidth() - btnW) / 2; 
+    
+    btnBackToMenu = CreateButton(btnX, GetScreenHeight() - 70, btnW, btnH, "Voltar ao menu");
 
     float mapWidth  = gLevel.width  * gLevel.tileSize;
     float mapHeight = gLevel.height * gLevel.tileSize;
@@ -110,7 +115,25 @@ void play_screen_draw(void) {
     EndMode2D();
     
     draw_hud(&gPlayer, &gLevel, &gInput);
-    DrawButton(btnBackToMenu);
+    
+    Rectangle r = btnBackToMenu.bounds;
+    bool hover = btnBackToMenu.hovered;
+
+    Color outlineCol = (Color){ 25, 25, 45, 255 }; 
+    Color mainCol    = hover ? (Color){ 80, 220, 240, 255 } : (Color){ 0, 190, 210, 255 }; 
+    Color shadowCol  = (Color){ 0, 140, 160, 255 }; 
+    DrawRectangleRec((Rectangle){r.x + 4, r.y + 4, r.width, r.height}, outlineCol);
+
+    DrawRectangleRec(r, outlineCol);
+    DrawRectangleRec((Rectangle){r.x + 3, r.y + 3, r.width - 6, r.height - 6}, mainCol);
+    
+    DrawRectangleRec((Rectangle){r.x + 3, r.y + r.height - 10, r.width - 6, 7}, shadowCol);
+
+    int fontSize = 20;
+    int textWidth = MeasureText(btnBackToMenu.text, fontSize);
+    int textX = r.x + (r.width - textWidth) / 2;
+    int textY = r.y + (r.height - fontSize) / 2;
+    DrawText(btnBackToMenu.text, textX, textY, fontSize, outlineCol);
 }
 
 void play_screen_unload(void) {
