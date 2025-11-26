@@ -1,18 +1,12 @@
 #include "collision.h"
-
 #include <math.h>
 #include <raylib.h>
 
-//------------------------------------------------------------------------------
 // Helpers
-//------------------------------------------------------------------------------
 static float get_tile_size(const Level* level) {
     return (level && level->tileSize > 0.0f) ? level->tileSize : 32.0f;
 }
-
-//------------------------------------------------------------------------------
 // Horizontal resolution
-//------------------------------------------------------------------------------
 static void resolve_horizontal(Player* player, const Level* level, CollisionResult* result, Rectangle* bounds) {
     if (!player || !level || !result || !bounds)
         return;
@@ -101,10 +95,7 @@ static void resolve_horizontal(Player* player, const Level* level, CollisionResu
             break;
     }
 }
-
-//------------------------------------------------------------------------------
 // Vertical resolution
-//------------------------------------------------------------------------------
 static void resolve_vertical(Player* player, const Level* level, CollisionResult* result, Rectangle* bounds) {
     if (!player || !level || !result || !bounds)
         return;
@@ -181,9 +172,7 @@ static void resolve_vertical(Player* player, const Level* level, CollisionResult
     }
 }
 
-//------------------------------------------------------------------------------
 // Public API
-//------------------------------------------------------------------------------
 void collision_result_reset(CollisionResult* result) {
     if (!result)
         return;
@@ -249,14 +238,16 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
         if (trap->type == TRAP_TYPE_DISAPPEARING && trap->state == TRAP_STATE_OFF) continue;
 
         Rectangle effectiveHitbox = trap->hitbox;
-        if (trap->type == TRAP_TYPE_SPIKE) {
-            float marginX = 6.0f;     // "Folga" lateral (o jogador pode pisar um pouquinho na borda)
-            float heightRatio = 0.5f; // Altura do espinho (0.5 = metade do bloco)
+        
+        if (trap->type == TRAP_TYPE_SPIKE || trap->type == TRAP_TYPE_FALSE) {
+            float marginX = 6.0f;    
+            float heightRatio = 0.5f; 
             effectiveHitbox.x += marginX;
             effectiveHitbox.width -= (marginX * 2);
             effectiveHitbox.y += (effectiveHitbox.height * (1.0f - heightRatio));
             effectiveHitbox.height *= heightRatio;
         }
+
         if (CheckCollisionRecs(pRect, effectiveHitbox)) {
             switch (trap->type) {
                 case TRAP_TYPE_SPIKE:
@@ -264,6 +255,11 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     result->died = true;
                     player->isAlive = false;
                     TraceLog(LOG_INFO, "Player morreu em espinho!");
+                    break;
+
+                case TRAP_TYPE_FALSE:
+                    trap->active = false; 
+                    TraceLog(LOG_INFO, "Trap Falsa ativada (sumiu)!");
                     break;
                     
                 case TRAP_TYPE_ONEWAY: {
@@ -282,17 +278,14 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                 } break;
 
                 case TRAP_TYPE_DISAPPEARING: {
-                    // distancia entre o centro do player e do bloco
                     float playerCenterX = pRect.x + pRect.width / 2.0f;
                     float trapCenterX = trap->hitbox.x + trap->hitbox.width / 2.0f;
                     float distanceHorizontal = fabsf(playerCenterX - trapCenterX);
                     
-                    // verifica se ta aprox na mesma altura
                     float playerFeetY = pRect.y + pRect.height;
                     float trapTopY = trap->hitbox.y;
                     float verticalDistance = fabsf(playerFeetY - trapTopY);
 
-                    // desaparece quando esta perto e na mesma altura
                     if (distanceHorizontal <= 64.0f && verticalDistance <= 16.0f && trap->state == TRAP_STATE_ACTIVE){
                         trap->state = TRAP_STATE_OFF;
                         TraceLog(LOG_INFO, "Bloco D desapareceu, idx=%zu", i);
@@ -312,7 +305,6 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     }
                     
                 } break;
-
                 default: 
                     break;
             }

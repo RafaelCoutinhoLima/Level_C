@@ -21,6 +21,7 @@ static TileType tile_from_char(char c) {
         case '^': return TILE_EMPTY;   // spike explícito
         case 'H': return TILE_EMPTY;   //oneway atravessavel
         case 'D': return TILE_EMPTY;   //bloco disappearing 
+        case 'F': return TILE_EMPTY;   // Trap falsa não é sólida no mapa
         default : return TILE_EMPTY;
     }
 }
@@ -32,6 +33,7 @@ static int sprite_index_from_char(char c) {
         case '.': return TSPR_FLOOR;
         case 'S': return TSPR_FLOOR;  // chão por baixo
         case 'G': return TSPR_GOAL;   // sprite de goal
+        case 'F': return TSPR_FLOOR;   // Desenha chão por baixo 
         case '^': return TSPR_FLOOR;
         case 'H': return TSPR_FLOOR;
         case 'D': return TSPR_FLOOR;
@@ -134,7 +136,8 @@ bool level_loader_load(const char* path, Level* out) {
                 // traps como objetos (piso por baixo)
                 case '^':   // spike explícito
                 case 'H':   //oneway atravessavel
-                case 'D':{ //disappearing 
+                case 'D':
+                case 'F':{ //disappearing 
                     Trap trap = (Trap){0};
                     trap.position = (Vector2){ (x + 0.5f) * tileSize, (y + 1.0f) * tileSize };
                     trap.hitbox   = (Rectangle){ x * tileSize, y * tileSize, tileSize, tileSize };
@@ -142,7 +145,8 @@ bool level_loader_load(const char* path, Level* out) {
                     if (c == '^') trap.type = TRAP_TYPE_SPIKE;
                     else if (c == 'H') trap.type = TRAP_TYPE_ONEWAY;
                     else if (c == 'D') trap.type = TRAP_TYPE_DISAPPEARING;
-
+                    else if (c == 'F') trap.type = TRAP_TYPE_FALSE;
+                    
                     trap.active = true;
                     //Inicializar o estado padrão para o bloco D
                     trap.state = TRAP_STATE_ACTIVE;
