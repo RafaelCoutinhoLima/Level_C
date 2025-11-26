@@ -258,8 +258,8 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                     break;
 
                 case TRAP_TYPE_FALSE:
-                    trap->active = false; 
-                    TraceLog(LOG_INFO, "Trap Falsa ativada (sumiu)!");
+                    trap->active = true; 
+                    TraceLog(LOG_INFO, "Trap Falsa ativada!");
                     break;
                     
                 case TRAP_TYPE_ONEWAY: {
