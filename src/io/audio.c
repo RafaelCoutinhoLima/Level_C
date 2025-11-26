@@ -5,7 +5,7 @@
 
 #define MASTER_VOL 1.0f
 #define MUSIC_VOL  0.6f 
-#define SFX_VOL    0.8f
+#define SFX_VOL    0.6f
 
 typedef struct AudioState{
     bool initialized;
