@@ -53,7 +53,7 @@ Trap* trap_set_get_mutable(TrapSet* set, size_t index){
     return &set->traps[index];
 }
 // Atualiza timers e estados (ex: faz o bloco sumir depois de um tempo)
-void trap_set_update(TrapSet* set, float dt) {
+void trap_set_update(TrapSet* set) {
     if (!set) return;
 
     for (size_t i = 0; i < set->count; i++) {
@@ -65,7 +65,7 @@ void trap_set_update(TrapSet* set, float dt) {
 void trap_set_reset(TrapSet* set) {
     if (!set) return;
     
-    for (int i = 0; i < set->count; i++) {
+    for (size_t i = 0; i < set->count; i++) {
         Trap* t = &set->traps[i];
         
         // Reseta todas as traps para o estado ativo

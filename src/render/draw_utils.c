@@ -9,18 +9,6 @@
 #include "progress/progress.h"
 #include "io/assets.h"
 
-// Sprites helpers
-void DrawSprite(Rectangle source_rect, Vector2 position){
-    Assets* assets = GetAssets();
-    DrawTextureRec(assets->spritesheet_atlas, source_rect, position, WHITE);
-}
-
-void DrawSpriteAdvanced(Rectangle source_rect, Rectangle dest_rect, Color tint){
-    Assets* assets = GetAssets();
-    Vector2 origin = (Vector2){0.0f, 0.0f};
-    DrawTexturePro(assets->spritesheet_atlas, source_rect, dest_rect, origin, 0.0f, tint);
-}
-
 void draw_level_map(const Level* L) {
     if (!L) return;
 
@@ -51,7 +39,7 @@ void draw_level_tiles (const Level* level){
 
             if (A && A->spritesheet_atlas.id && A->rect_platform.width > 0 && A->rect_platform.height > 0) {
                 Vector2 pos = { tileRect.x, tileRect.y };
-                DrawSprite(A->rect_platform, pos);
+                DrawTextureRec(A->spritesheet_atlas, A->rect_platform, pos, WHITE);
             } else {
                 // Fallback visual
                 DrawRectangleRec(tileRect, (Color){60,200,80,100});
@@ -68,7 +56,6 @@ void draw_traps(const TrapSet* trapSet){
         const Trap* t = trap_set_get(trapSet, i);
         if (!t || !t->active) continue;
 
-        Color color;
         Assets* A = GetAssets();
 
         switch (t->type) {
@@ -161,18 +148,6 @@ void draw_player(const Player* player){
         0.0f,
         WHITE
     );
-}
-
-static const char* GetPlayerStateName(const Player* player){
-    if(!player->isAlive) return "MORTO";
-
-    if(player->isOnGround){
-        if(fabsf(player->velocity.x) < 0.1f) return "PARADO";
-        return "CORRENDO";
-    }else{
-        if(player->velocity.y < 0.0f) return "Pulando";
-        return "caindo";
-    }
 }
 // Goal
 void draw_goal(const Level* level) {

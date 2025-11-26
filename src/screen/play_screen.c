@@ -72,7 +72,7 @@ void play_screen_update(float dt) {
     player_update_hitbox(&gPlayer);
     physics_apply_level_bounds(&gPlayer, &gLevel);
 
-    trap_set_update(&gLevel.trapSet, dt);
+    trap_set_update(&gLevel.trapSet);
 
     collisions_resolve_player_map(&gPlayer, &gLevel, &gCol);
     collisions_check_player_traps(&gPlayer, &gLevel.trapSet, &gCol);

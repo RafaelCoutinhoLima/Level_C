@@ -150,7 +150,6 @@ bool level_loader_load(const char* path, Level* out) {
                     trap.active = true;
                     //Inicializar o estado padrão para o bloco D
                     trap.state = TRAP_STATE_ACTIVE;
-                    trap.timer = 0.0f;
 
                     if (!trap_set_add(&out->trapSet, trap)) {
                         TraceLog(LOG_WARNING,
