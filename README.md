@@ -1,5 +1,4 @@
-![Nome da Imagem](<img width="1052" height="367" alt="title-screen" src="https://github.com/user-attachments/assets/510acc7e-fecd-472e-80f3-ff99faf94fd0" />
-)
+![Menu Principal](https://github.com/user-attachments/assets/510acc7e-fecd-472e-80f3-ff09faf94fd0)
 # 😈 Level C
 
 **"Um remake 2D do 'Level Devil' (mas em C)"**
