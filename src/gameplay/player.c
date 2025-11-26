@@ -4,7 +4,7 @@
 #include "io/assets.h"
 
 static const Vector2 PLAYER_SIZE = {24.0f, 32.0f};
-static const float PLAYER_MOVE_SPEED = 180.0f;
+static const float PLAYER_MOVE_SPEED = 130.0f;
 
 // Frame 0: Estático
 // Frame 1-6: Andando
