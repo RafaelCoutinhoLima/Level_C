@@ -131,8 +131,8 @@ void play_screen_update(float dt) {
         
         if (dustTimer >= 0.1f) {  // A cada 0.1 segundos
             Vector2 dustPos = (Vector2){
-                gPlayer.position.x,
-                gPlayer.position.y + gPlayer.hitbox.height / 2  // Embaixo do player
+                gPlayer.hitbox.x + gPlayer.hitbox.width / 2,
+                gPlayer.hitbox.y + gPlayer.hitbox.height  // Embaixo do player
             };
             particle_emit_dust(&gParticles, dustPos);
             dustTimer = 0.0f;
