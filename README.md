@@ -4,7 +4,7 @@
 
 
 Level C é um jogo de plataforma 2D do gênero *rage* (feito para passar raiva), inspirado no notório **Level Devil**.  
-O objetivo é simples: chegar ao final da fase. A dificuldade é... bom, você vai descobrir.
+O objetivo é simples: superar obstáculos, armadilhas e alcançar o portal de saída em cada nível.
 
 O jogo foi desenvolvido em **C puro** utilizando a biblioteca gráfica **Raylib** para a disciplina de *Programação Imperativa Formativa (PIF)* na CESAR School.
 
@@ -15,7 +15,7 @@ O jogo foi desenvolvido em **C puro** utilizando a biblioteca gráfica **Raylib*
 Projeto desenvolvido por:
 
 - Guilherme Tolentino Leitão De Melo  
-- João Eduardo Azevedo  
+- João Eduardo Azevedo de Andrade
 - Rafael Coutinho Lima
 
 ---
@@ -35,97 +35,85 @@ Ou clique no botão abaixo:
 
 ## 🛠️ Compilando e Rodando
 
-### ✅ 1. Instale as Dependências (Raylib)
+### ✅ Instale as Dependências (Raylib)
 
 ### 🔸 Linux (Ubuntu/Debian)
 
-Antes de seguir o guia oficial, tente o método mais simples via terminal:
+```bash
+# Atualizar repositórios
+sudo apt update
 
-    sudo apt update
+# Instalar ferramentas de build
+sudo apt install build-essential git
 
-    # Instala as dependências gráficas e de áudio necessárias
-    sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
-    libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev \
-    libxkbcommon-dev
+# Instalar Raylib (já inclui todas as dependências necessárias)
+sudo apt install libraylib-dev
 
-    # Instala a biblioteca Raylib
-    sudo apt install libraylib-dev
+#### 🔸 macOS
 
-💡 *Se estiver usando outra distribuição ou SO (Windows/Mac), consulte o Guia Oficial da Raylib.*
+Antes de seguir o guia oficial, tente o método mais simples:
 
+```bash
+brew install raylib
+
+⚠️ O jogo não foi testado no sistema Mac.
+
+💡 *Se estiver usando outra distribuição ou SO (Windows), consulte o Guia Oficial da Raylib.*
 ---
 
-### 📥 2. Clone o repositório e baixar raylib
+### 📥 Clone o repositório
 
     git clone github.com/RafaelCoutinhoLima/Level_C
     cd Level_C
-    sudo apt install libraylib-dev
 
 ---
 
-### ▶️ 3. Compile e execute o jogo
+### ▶️ Compile e execute o jogo
 Dentro da pasta do projeto:
 
 #### Usando Makefile:
 
     make clean && make run
 
-#### Ou compilação manual (GCC):
-
-    gcc main.c -o game -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./game
-
 ---
 
-## 🎮 Modos de Jogo
+## 🎮 Como Jogar
+O objetivo é guiar o personagem até o portal de saída se livrando de todos os obstáculos.
 
-### 🧍‍♂️ Modo Campanha
-O jogador deve atravessar uma série de níveis sequenciais.  
-Cada nível introduz uma nova mecânica de trollagem ou desafio de física.
+### 🕹️ Controles
+- ⬅️ **A / ← — mover para a esquerda 
+- ➡️ **D / → — mover para a direita  
+- ⬆️ **W / ↑ / Espaço — pular  
 
-⚠️ **Não existem checkpoints**: morreu, volta pro início.
-
----
-
-## 🎛️ Menu de Seleção
-
-No menu principal, você encontrará:
-  
-- **Level Select (menu de níveis)** — escolha fases já desbloqueadas.  
-- **Voltar** — retorna ao menu anterior.
-
----
-
-## 🕹️ Como Jogar
-O objetivo é guiar o personagem até a porta de saída sem morrer para as armadilhas invisíveis.
-
-### Controles Básicos
-- ⬅️ **Esquerda / A** — mover para trás  
-- ➡️ **Direita / D** — mover para frente  
-- ⬆️ **Cima / W / Espaço** — pular  
-
-### Mecânica de Pulo
+### 🦘 Mecânica de Pulo
 A altura do pulo é dinâmica: segure para pular mais alto, toque rápido para pulo curto.
 
----
-
-## 🧠 Detalhes Extras da Jogabilidade
-
-### 🧱 Plataformas Fantasmas
-- Algumas desaparecem quando tocadas.  
-- Outras são invisíveis e só aparecem ao colidir.
-
-### ⚙️ Espinhos
-Espinhos posicionados estrategicamente que exigem precisão e cuidado ao se movimentar.
+### 🎯 Objetivo
+- Alcance o portal no final de cada nível.
+- Evite armadilhas mortais
+- Complete todos os níveis disponíveis.
 
 ---
 
-## 🧐 Curiosidade
+## 🗺️ Elementos do Jogo
 
-O nome **Level C** surgiu como uma brincadeira dupla:
+### 🟪 Plataformas (Roxo Escuro)
+Blocos sólidos que formam o chão e paredes do nível.
 
-1. Referência direta ao jogo original **Level Devil**.  
-2. O jogo foi desenvolvido **inteiramente em C**, durante a disciplina de **Programação Iperativa Funcional (PIF)**.  
+### 🔶 Espinhos (Laranja)
+**Armadilha mortal!** Ao tocar, você morre e retorna ao início.
 
-Seguindo a tradição da equipe em criar jogos com nomes baseados na tecnologia utilizada.
+### 🟪 Blocos Falsos (Roxo Escuro)
+Parecem plataformas normais, mas **desaparecem** quando você pisa.
+
+### ⬛ Plataformas Unidirecionais (Preto)
+Barra preta que permite pular através de baixo para cima, mas não de cima para baixo.
+
+### 🌸 Portal (Magenta/Rosa)
+**Meta do nível!** Alcance-o para completar a fase e desbloquear a próxima.
 
 ---
+
+
+
+
