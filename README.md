@@ -55,10 +55,11 @@ Antes de seguir o guia oficial, tente o método mais simples via terminal:
 
 ---
 
-### 📥 2. Clone o repositório
+### 📥 2. Clone o repositório e baixar raylib
 
-    git clone https://github.com/SEU_USUARIO/level-c.git
+    git clone github.com/RafaelCoutinhoLima/Level_C
     cd level-c
+    sudo apt install libraylib-dev
 
 ---
 
