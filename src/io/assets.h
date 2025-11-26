@@ -19,6 +19,7 @@ typedef struct Assets {
     Rectangle rect_trap_spike;   // trap/espinho
     Rectangle rect_trap_false;
     Rectangle rect_goal_door;    // "porta"/goal 
+    Rectangle rect_spike_false;
 } Assets;
 
 /* Inicializa/verifica assets e estrutura mínima de pastas.

@@ -89,6 +89,7 @@ bool assets_init(void) {
     g_assets.rect_trap_spike   = (Rectangle){ 64, 0, 32, 32 };  
     g_assets.rect_goal_door    = (Rectangle){ 96, 0, 32, 32 };  
     g_assets.rect_trap_false   = (Rectangle){ 128, 0, 32, 32 };
+    g_assets.rect_spike_false = (Rectangle){64, 0, 32, 32};
 
     return true;
 }
