@@ -25,19 +25,22 @@ static Rectangle btnBackArea;
 static bool btnBackHovered = false;
 static float btnAnimScale = 1.0f; 
 
+static Texture2D lockerTex; 
+
 static void SetupNodes(void) {
-    // FILEIRA 1 (Topo)
+    
+    // FILEIRA 1
     nodes[0] = (LevelNode){1, {213, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[1] = (LevelNode){2, {456, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[2] = (LevelNode){3, {673, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[3] = (LevelNode){4, {888, 269}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // FILEIRA 2 (Meio)
+    // FILEIRA 2
     nodes[4] = (LevelNode){5, {906, 395}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[5] = (LevelNode){6, {689, 395}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[6] = (LevelNode){7, {459, 395}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // FILEIRA 3 (Baixo)
+    // FILEIRA 3
     nodes[7] = (LevelNode){8, {212, 449}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[8] = (LevelNode){9, {346, 530}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[9] = (LevelNode){10,{572, 530}, NODE_AVAILABLE, false, 1.0f}; 
@@ -56,6 +59,9 @@ void map_screen_init(void) {
     TraceLog(LOG_INFO, "[Map] Init");
     audio_init();
     SetupNodes();
+
+    lockerTex = LoadTexture("assets/locker.png"); 
+    SetTextureFilter(lockerTex, TEXTURE_FILTER_POINT);
 
     fadeAlpha        = 1.0f;
     isFadingOut      = false;
@@ -104,7 +110,6 @@ void map_screen_update(float dt) {
     }
     if (fadeAlpha > 0.1f && isFadingOut) return;
 
-    // Lógica das Covas
     hoveredNodeIndex = -1;
     for (int i = 0; i < totalNodes; i++) {
         Rectangle nodeRect = {
@@ -164,9 +169,15 @@ void map_screen_draw(void) {
             DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, WHITE);
         }
     }
+
     for (int i = 0; i < totalNodes; i++) {
+        float currentScale = nodes[i].animScale;
+        float drawW = GRAVE_W;
+        float drawH = GRAVE_H;
+        float drawX = nodes[i].position.x;
+        float drawY = nodes[i].position.y;
+
         if (nodes[i].isHovered && bg.id != 0) {
-            float scale = nodes[i].animScale; 
             float scaleX = (float)bg.width / GetScreenWidth();
             float scaleY = (float)bg.height / GetScreenHeight();
 
@@ -177,43 +188,38 @@ void map_screen_draw(void) {
                 GRAVE_H * scaleY
             };
 
-            float newW = GRAVE_W * scale;
-            float newH = GRAVE_H * scale;
+            drawW = GRAVE_W * currentScale;
+            drawH = GRAVE_H * currentScale;
             
-            Rectangle destRec = {
-                nodes[i].position.x - (newW - GRAVE_W) / 2.0f, 
-                nodes[i].position.y - (newH - GRAVE_H) / 2.0f - (scale > 1.0f ? 5.0f : 0.0f), 
-                newW,
-                newH
-            };
+            drawX = nodes[i].position.x - (drawW - GRAVE_W) / 2.0f;
+            drawY = nodes[i].position.y - (drawH - GRAVE_H) / 2.0f - (currentScale > 1.0f ? 5.0f : 0.0f);
 
-            Color tint = (nodes[i].state == NODE_LOCKED) ? GRAY : WHITE;
+            Rectangle destRec = { drawX, drawY, drawW, drawH };
+
+            Color tint = (nodes[i].state == NODE_LOCKED) ? LIGHTGRAY : WHITE;
             DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, tint);
-            if (nodes[i].state == NODE_LOCKED) {
-                float lockW = newW * 0.4f; 
-                float lockH = newH * 0.35f; 
-                float centerX = destRec.x + newW / 2.0f;
-                float centerY = destRec.y + newH / 2.0f;
-                
-                Color lockSilver = (Color){ 200, 200, 220, 255 };
-                Color lockDark   = (Color){ 40, 40, 50, 255 };
-                
-                float radius = lockW * 0.35f;
-                
-                DrawRing((Vector2){centerX, centerY - lockH * 0.4f}, radius * 0.6f, radius, 180.0f, 360.0f, 0, lockSilver);
-                DrawRing((Vector2){centerX, centerY - lockH * 0.4f}, radius, radius + 2.0f, 180.0f, 360.0f, 0, BLACK);
-                
-                Rectangle bodyRec = {centerX - lockW / 2.0f, centerY - lockH * 0.4f, lockW, lockH};
-                
-                DrawRectangleRec(bodyRec, lockSilver);          
-                DrawRectangleLinesEx(bodyRec, 3.0f, lockDark);  
-                DrawCircle(centerX, centerY + lockH * 0.1f, lockW * 0.15f, lockDark);
-                DrawRectangle(centerX - lockW * 0.05f, centerY + lockH * 0.1f, lockW * 0.1f, lockH * 0.25f, lockDark);
-            }
+        }
+
+        if (nodes[i].state == NODE_LOCKED) {
+            // Define o tamanho alvo: 50% da largura da área da lápide
+            float targetLockWidth = drawW * 0.5f; 
+            
+            // Calcula a escala para a imagem ficar desse tamanho
+            float lockScale = targetLockWidth / (float)lockerTex.width;
+            
+            float lockW = lockerTex.width * lockScale;
+            float lockH = lockerTex.height * lockScale;
+
+            float lockX = drawX + (drawW - lockW) / 2.0f;
+            float lockY = drawY + (drawH - lockH) / 2.0f;
+
+
+            DrawTextureEx(lockerTex, (Vector2){lockX + 2, lockY + 2}, 0.0f, lockScale, (Color){0,0,0,100});
+            DrawTextureEx(lockerTex, (Vector2){lockX, lockY}, 0.0f, lockScale, WHITE);
         }
     }
     
-    //SCORE DE MORTES 
+    // SCORE DE MORTES 
     int deaths = progress_get_total_deaths();
     DrawText(TextFormat("%d", deaths), 105, 638, 55, WHITE);
 
@@ -223,6 +229,7 @@ void map_screen_draw(void) {
 }
 
 void map_screen_unload(void) {
+    UnloadTexture(lockerTex);
     TraceLog(LOG_INFO, "[Map] unload");
 }
 
