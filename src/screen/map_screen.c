@@ -1,13 +1,11 @@
 #include "map_screen.h"
 #include "core/state.h"
-#include "ui/button.h"
 #include "progress/progress.h"
 #include "io/audio.h"
 #include "io/assets.h" 
 #include <raylib.h>
 #include <math.h> 
 
-// DIMENSÕES CALIBRADAS
 #define GRAVE_W 117.0f
 #define GRAVE_H 115.0f
 
@@ -23,14 +21,11 @@ static bool  isFadingOut      = false;
 static int   nextLevelId      = -1;
 static float pulseTimer       = 0.0f; 
 
-static Button btnBackToMenu;
-
-// Não precisamos mais da variável textureLock pois vamos desenhar via código
-// static Texture2D textureLock; 
+static Rectangle btnBackArea;
+static bool btnBackHovered = false;
+static float btnAnimScale = 1.0f; 
 
 static void SetupNodes(void) {
-    //COORDENADAS das covas (TOP-LEFT)
-
     // FILEIRA 1 (Topo)
     nodes[0] = (LevelNode){1, {213, 269}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[1] = (LevelNode){2, {456, 269}, NODE_AVAILABLE, false, 1.0f}; 
@@ -47,7 +42,6 @@ static void SetupNodes(void) {
     nodes[8] = (LevelNode){9, {346, 530}, NODE_AVAILABLE, false, 1.0f}; 
     nodes[9] = (LevelNode){10,{572, 530}, NODE_AVAILABLE, false, 1.0f}; 
 
-    // Bloqueia as fases que o jogador ainda não desbloqueou
     int maxUnlocked = progress_get_max_unlocked();
     for(int i=0; i < totalNodes; i++){
         if (nodes[i].levelId > maxUnlocked) {
@@ -69,16 +63,28 @@ void map_screen_init(void) {
     hoveredNodeIndex = -1;
     pulseTimer       = 0.0f;
     
-    // Removi o LoadTexture para não dar erro com a imagem ruim
-    // textureLock = LoadTexture("assets/locker.png");
-    
-    btnBackToMenu = CreateButton(GetScreenWidth() - 220, GetScreenHeight() - 60, 200, 40, "Voltar");
+    btnBackArea = (Rectangle){ 1045.0f, 623.0f, 211.0f, 73.0f };
+    btnBackHovered = false;
+    btnAnimScale = 1.0f;
 }
 
 void map_screen_update(float dt) {
     audio_update();
     Vector2 mousePos = GetMousePosition();
     pulseTimer += dt * 5.0f; 
+
+    if (!isFadingOut) {
+        btnBackHovered = CheckCollisionPointRec(mousePos, btnBackArea);
+        if (btnBackHovered) {
+            if (btnAnimScale < 1.1f) btnAnimScale += ANIM_SPEED * dt;
+            
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                state_change(SCREEN_HOME);
+            }
+        } else {
+            if (btnAnimScale > 1.0f) btnAnimScale -= ANIM_SPEED * dt;
+        }
+    }
 
     if (!isFadingOut) {
         if (fadeAlpha > 0.0f) {
@@ -96,9 +102,9 @@ void map_screen_update(float dt) {
             return;
         }
     }
-
     if (fadeAlpha > 0.1f && isFadingOut) return;
 
+    // Lógica das Covas
     hoveredNodeIndex = -1;
     for (int i = 0; i < totalNodes; i++) {
         Rectangle nodeRect = {
@@ -114,7 +120,6 @@ void map_screen_update(float dt) {
             if (nodes[i].animScale < 1.1f) nodes[i].animScale += ANIM_SPEED * dt;
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                // Só entra se NÃO estiver bloqueado
                 if (nodes[i].state != NODE_LOCKED) {
                     nextLevelId = nodes[i].levelId;
                     isFadingOut = true;
@@ -125,31 +130,43 @@ void map_screen_update(float dt) {
             if (nodes[i].animScale > 1.0f) nodes[i].animScale -= ANIM_SPEED * dt;
         }
     }
-
-    if (!isFadingOut) {
-        if (UpdateButton(&btnBackToMenu)) state_change(SCREEN_HOME);
-    }
 }
 
 void map_screen_draw(void) {
     ClearBackground(BLACK);
 
     Texture2D bg = GetAssets()->map_background;
-    
-    //Desenha o fundo estático
     if (bg.id != 0) {
         Rectangle source = { 0.0f, 0.0f, (float)bg.width, (float)bg.height };
         Rectangle dest   = { 0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight() };
         DrawTexturePro(bg, source, dest, (Vector2){0,0}, 0.0f, WHITE);
-    }
+        
+        if (btnAnimScale > 1.001f) {
+            float scaleX = (float)bg.width / GetScreenWidth();
+            float scaleY = (float)bg.height / GetScreenHeight();
 
-    //Desenha as Covas e o Cadeado
+            Rectangle sourceRec = {
+                btnBackArea.x * scaleX,
+                btnBackArea.y * scaleY,
+                btnBackArea.width * scaleX,
+                btnBackArea.height * scaleY
+            };
+
+            float newW = btnBackArea.width * btnAnimScale;
+            float newH = btnBackArea.height * btnAnimScale;
+            
+            Rectangle destRec = {
+                btnBackArea.x - (newW - btnBackArea.width) / 2.0f,
+                btnBackArea.y - (newH - btnBackArea.height) / 2.0f,
+                newW,
+                newH
+            };
+            DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, WHITE);
+        }
+    }
     for (int i = 0; i < totalNodes; i++) {
-    
-        // Lógica de zoom e posição
         if (nodes[i].isHovered && bg.id != 0) {
             float scale = nodes[i].animScale; 
-
             float scaleX = (float)bg.width / GetScreenWidth();
             float scaleY = (float)bg.height / GetScreenHeight();
 
@@ -170,61 +187,35 @@ void map_screen_draw(void) {
                 newH
             };
 
-            // Cor da cova (Cinza se bloqueado)
             Color tint = (nodes[i].state == NODE_LOCKED) ? GRAY : WHITE;
             DrawTexturePro(bg, sourceRec, destRec, (Vector2){0,0}, 0.0f, tint);
             if (nodes[i].state == NODE_LOCKED) {
-                
-                // Calcula tamanho do cadeado relativo à cova (40% do tamanho)
                 float lockW = newW * 0.4f; 
                 float lockH = newH * 0.35f; 
                 float centerX = destRec.x + newW / 2.0f;
                 float centerY = destRec.y + newH / 2.0f;
                 
-                // Cores do cadeado
                 Color lockSilver = (Color){ 200, 200, 220, 255 };
                 Color lockDark   = (Color){ 40, 40, 50, 255 };
                 
-                //A "Alça" do cadeado (Arco)
                 float radius = lockW * 0.35f;
-                DrawRing(
-                    (Vector2){centerX, centerY - lockH * 0.4f}, 
-                    radius * 0.6f,  
-                    radius,         
-                    180.0f, 360.0f, 
-                    0,              
-                    lockSilver
-                );
-                //Borda preta fina na alça (opcional, pra dar destaque)
-                DrawRing(
-                    (Vector2){centerX, centerY - lockH * 0.4f}, 
-                    radius, 
-                    radius + 2.0f, 
-                    180.0f, 360.0f, 
-                    0, 
-                    BLACK
-                );
-                //O Corpo do cadeado (Retângulo)
-                Rectangle bodyRec = {
-                    centerX - lockW / 2.0f,
-                    centerY - lockH * 0.4f,
-                    lockW,
-                    lockH
-                };
+                
+                DrawRing((Vector2){centerX, centerY - lockH * 0.4f}, radius * 0.6f, radius, 180.0f, 360.0f, 0, lockSilver);
+                DrawRing((Vector2){centerX, centerY - lockH * 0.4f}, radius, radius + 2.0f, 180.0f, 360.0f, 0, BLACK);
+                
+                Rectangle bodyRec = {centerX - lockW / 2.0f, centerY - lockH * 0.4f, lockW, lockH};
+                
                 DrawRectangleRec(bodyRec, lockSilver);          
                 DrawRectangleLinesEx(bodyRec, 3.0f, lockDark);  
-                
-                //A Fechadura (Círculo + Triângulo/Retângulo)
                 DrawCircle(centerX, centerY + lockH * 0.1f, lockW * 0.15f, lockDark);
                 DrawRectangle(centerX - lockW * 0.05f, centerY + lockH * 0.1f, lockW * 0.1f, lockH * 0.25f, lockDark);
             }
         }
     }
-    // SCORE DE MORTES 
+    
+    //SCORE DE MORTES 
     int deaths = progress_get_total_deaths();
     DrawText(TextFormat("%d", deaths), 105, 638, 55, WHITE);
-
-    DrawButton(btnBackToMenu);
 
     if (fadeAlpha > 0.0f) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, fadeAlpha));
