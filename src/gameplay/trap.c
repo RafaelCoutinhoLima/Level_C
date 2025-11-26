@@ -61,3 +61,16 @@ void trap_set_update(TrapSet* set, float dt) {
         if (!t->active) continue;
     }
 }
+
+void trap_set_reset(TrapSet* set) {
+    if (!set) return;
+    
+    for (int i = 0; i < set->count; i++) {
+        Trap* t = &set->traps[i];
+        
+        // Reseta todas as traps para o estado ativo
+        t->state = TRAP_STATE_ACTIVE;
+    }
+    
+    TraceLog(LOG_INFO, "[TrapSet] Todas as traps foram resetadas");
+}

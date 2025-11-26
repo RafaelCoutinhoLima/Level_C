@@ -83,7 +83,8 @@ void play_screen_update(float dt) {
 
     if (gCol.died) {
         audio_play_event(AUDIO_SFX_DIE);
-        progress_add_death(); 
+        progress_add_death();
+        trap_set_reset(&gLevel.trapSet);
         player_reset(&gPlayer, gLevel.spawn);
     }
 

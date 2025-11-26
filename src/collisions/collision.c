@@ -282,21 +282,35 @@ void collisions_check_player_traps(Player* player, TrapSet* trapSet, CollisionRe
                 } break;
 
                 case TRAP_TYPE_DISAPPEARING: {
-                    float feetY = pRect.y + pRect.height;
-                    float overlapY = feetY - trap->hitbox.y;
+                    // distancia entre o centro do player e do bloco
+                    float playerCenterX = pRect.x + pRect.width / 2.0f;
+                    float trapCenterX = trap->hitbox.x + trap->hitbox.width / 2.0f;
+                    float distanceHorizontal = fabsf(playerCenterX - trapCenterX);
+                    
+                    // verifica se ta aprox na mesma altura
+                    float playerFeetY = pRect.y + pRect.height;
+                    float trapTopY = trap->hitbox.y;
+                    float verticalDistance = fabsf(playerFeetY - trapTopY);
 
-                    if (player->velocity.y >= 0 && overlapY > 0 && overlapY < 16.0f) {
-                        player->position.y = trap->hitbox.y;
-                        player_update_hitbox(player);
-                        player->velocity.y = 0.0f;
-                        player->isOnGround = true;
-                        result->hitGround = true;
-                        
-                        if (trap->state == TRAP_STATE_ACTIVE) {
-                            trap->state = TRAP_STATE_OFF;
-                            TraceLog(LOG_INFO, "Bloco D desapareceu! idx=%zu", i);
+                    // desaparece quando esta perto e na mesma altura
+                    if (distanceHorizontal <= 64.0f && verticalDistance <= 16.0f && trap->state == TRAP_STATE_ACTIVE){
+                        trap->state = TRAP_STATE_OFF;
+                        TraceLog(LOG_INFO, "Bloco D desapareceu, idx=%zu", i);
+                    }
+
+                    if (trap->state == TRAP_STATE_ACTIVE){
+                        float feetY = pRect.y +pRect.height;
+                        float overlapY = feetY - trap->hitbox.y;
+
+                        if (player->velocity.y >= 0 && overlapY > 0 && overlapY <16.0f){
+                            player->position.y = trap->hitbox.y;
+                            player_update_hitbox(player);
+                            player->velocity.y = 0.0f;
+                            player->isOnGround = true;
+                            result->hitGround = true;
                         }
                     }
+                    
                 } break;
 
                 default: 

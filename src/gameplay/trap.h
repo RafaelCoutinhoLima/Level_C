@@ -40,3 +40,4 @@ Trap* trap_set_get_mutable(TrapSet* set,size_t index);
 const Trap* trap_set_get(const TrapSet* set, size_t index);
 //para atualizar o timer 
 void trap_set_update(TrapSet* set,float dt);
+void trap_set_reset(TrapSet* set);
