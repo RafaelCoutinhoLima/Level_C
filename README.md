@@ -2,7 +2,7 @@
 
 **"Um remake 2D do 'Level Devil' (mas em C)"**
 
-<img src="resources/readme/gameplay_banner.png" alt="Gameplay do Level C" width="100%"/>
+<img src="resources/readme/gameplay_banner.png" alt=BANER LEVEL C" width="100%"/>
 
 Level C é um jogo de plataforma 2D do gênero *rage* (feito para passar raiva), inspirado no notório **Level Devil**.  
 O objetivo é simples: chegar ao final da fase. A dificuldade é... bom, você vai descobrir.
@@ -30,7 +30,7 @@ Confira o screencast do jogo e veja as mecânicas (e o sofrimento) em ação:
 
 Ou clique no botão abaixo:
 
-[![Assistir no YouTube](https://img.shields.io/badge/▶️%20Assistir%20no%20YouTube-red?style=for-the-badge)](https://www.youtube.com/watch?v=lugar de botar deposi de gravar)
+[![Assistir no YouTube](https://www.youtube.com/watch?v=lugar de botar deposi de gravar)
 
 ---
 
