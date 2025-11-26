@@ -91,6 +91,9 @@ void map_screen_update(float dt) {
             if (btnAnimScale > 1.0f) btnAnimScale -= ANIM_SPEED * dt;
         }
     }
+    if (IsKeyPressed(KEY_R)) {
+        progress_reset();
+        SetupNodes(); }
 
     if (!isFadingOut) {
         if (fadeAlpha > 0.0f) {
@@ -201,10 +204,8 @@ void map_screen_draw(void) {
         }
 
         if (nodes[i].state == NODE_LOCKED) {
-            // Define o tamanho alvo: 50% da largura da área da lápide
             float targetLockWidth = drawW * 0.5f; 
             
-            // Calcula a escala para a imagem ficar desse tamanho
             float lockScale = targetLockWidth / (float)lockerTex.width;
             
             float lockW = lockerTex.width * lockScale;
@@ -222,6 +223,7 @@ void map_screen_draw(void) {
     // SCORE DE MORTES 
     int deaths = progress_get_total_deaths();
     DrawText(TextFormat("%d", deaths), 105, 638, 55, WHITE);
+    DrawText("[R] Resetar Progresso", 20, 20, 20, LIGHTGRAY);
 
     if (fadeAlpha > 0.0f) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, fadeAlpha));

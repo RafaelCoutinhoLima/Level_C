@@ -24,10 +24,6 @@ void home_screen_update(float dt){
     if (UpdateButton(&btnGoToMenu)){
         state_change(SCREEN_MAP);
     }
-    //resetar o save (Tecla R)
-    if (IsKeyPressed(KEY_R)) {
-        progress_reset();
-    }
 }
 void home_screen_draw(void){
     ClearBackground((Color){20, 20, 30, 255});
