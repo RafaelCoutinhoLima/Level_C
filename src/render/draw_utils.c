@@ -2,17 +2,14 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <math.h>
-
 #include "gameplay/player.h"
 #include "gameplay/level.h"
-#include "gameplay/tiles.h"   // TILE_SIZE, tileset_src_from_index
-#include "io/input.h"         // InputState
+#include "gameplay/tiles.h"   
+#include "io/input.h"         
 #include "progress/progress.h"
 #include "io/assets.h"
 
-// -----------------------------------------------------------------------------
 // Sprites helpers
-// -----------------------------------------------------------------------------
 void DrawSprite(Rectangle source_rect, Vector2 position){
     Assets* assets = GetAssets();
     DrawTextureRec(assets->spritesheet_atlas, source_rect, position, WHITE);
@@ -33,7 +30,7 @@ void draw_level_map(const Level* L) {
     for (int y = 0; y < L->height; y++) {
         for (int x = 0; x < L->width; x++) {
             int idx = L->sprites[y][x];
-            if (idx < 0) idx = 0; // fallback
+            if (idx < 0) idx = 0; 
 
             Rectangle src = tileset_src_from_index(idx);
             Vector2   dst = (Vector2){ x * (float)TILE_SIZE, y * (float)TILE_SIZE };
@@ -41,15 +38,10 @@ void draw_level_map(const Level* L) {
         }
     }
 }
-
-// -----------------------------------------------------------------------------
-// Sólidos (colisão). Usa rect_platform do atlas; se faltar, fallback colorido.
-// -----------------------------------------------------------------------------
 void draw_level_tiles (const Level* level){
     if (!level) return;
 
     Assets* A = GetAssets();
-    float ts = level->tileSize;
 
     for (int y = 0; y < level->height; y++){
         for (int x = 0; x < level->width; x++){
@@ -68,10 +60,7 @@ void draw_level_tiles (const Level* level){
         }
     }
 }
-
-// -----------------------------------------------------------------------------
-// Traps (debug)
-// -----------------------------------------------------------------------------
+// Traps (Aqui está a mágica da Trap Falsa)
 void draw_traps(const TrapSet* trapSet){
     if (!trapSet) return;
 
@@ -83,8 +72,9 @@ void draw_traps(const TrapSet* trapSet){
         Assets* A = GetAssets();
 
         switch (t->type) {
-            // Trap dos espinhos
+            //F: Desenha a trap FALSA exatamente igual ao ESPINHO verdadeiro
             case TRAP_TYPE_SPIKE:
+            case TRAP_TYPE_FALSE: 
                 DrawTexturePro(
                     A->spritesheet_atlas,
                     A->rect_trap_spike,
@@ -123,10 +113,7 @@ void draw_traps(const TrapSet* trapSet){
         }
     }
 }
-
-// -----------------------------------------------------------------------------
 // Player
-// -----------------------------------------------------------------------------
 void draw_player(const Player* player){
     if (!player) return;
 
@@ -191,9 +178,7 @@ static const char* GetPlayerStateName(const Player* player){
     }
 }
 
-// -----------------------------------------------------------------------------
-// HUD (debug)
-// -----------------------------------------------------------------------------
+// HUD
 void draw_hud(const Player* player, const Level* level,const InputState* input){
     if (!player || !level || !input) return;
 
@@ -214,9 +199,7 @@ void draw_hud(const Player* player, const Level* level,const InputState* input){
     DrawText(TextFormat("Nível: %d", progress_get_current_level()), 
         GetScreenWidth() - 100, 12, 18, DARKGRAY);
 }
-// -----------------------------------------------------------------------------
 // Goal
-// -----------------------------------------------------------------------------
 void draw_goal(const Level* level) {
     if (!level) return;
     
