@@ -1,3 +1,5 @@
+![Nome da Imagem](<img width="1052" height="367" alt="title-screen" src="https://github.com/user-attachments/assets/510acc7e-fecd-472e-80f3-ff99faf94fd0" />
+)
 # 😈 Level C
 
 **"Um remake 2D do 'Level Devil' (mas em C)"**
@@ -83,9 +85,9 @@ Dentro da pasta do projeto:
 O objetivo é guiar o personagem até o portal de saída se livrando de todos os obstáculos.
 
 ### 🕹️ Controles
-- ⬅️ **A / ← — mover para a esquerda 
-- ➡️ **D / → — mover para a direita  
-- ⬆️ **W / ↑ / Espaço — pular  
+- ⬅️ **A / ←** — mover para a esquerda 
+- ➡️ **D / →** — mover para a direita  
+- ⬆️ **W / ↑ / Espaço** — pular  
 
 ### 🦘 Mecânica de Pulo
 A altura do pulo é dinâmica: segure para pular mais alto, toque rápido para pulo curto.
