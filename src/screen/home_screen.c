@@ -2,14 +2,11 @@
 #include "raylib.h"
 #include "core/state.h"
 #include "ui/button.h"
-
+#include "progress/progress.h"
 static Button btnGoToMenu;
 static Texture2D titleScreen;
 
-// X=460 (Mais para a esquerda para centralizar melhor)
-// Y=500 (Bem mais alto para pegar toda a borda de luz em cima)
-// W=360 (Mais largo para garantir que não corta a direita)
-// H=120 (Mais alto para pegar até a sombra de baixo)
+
 static Rectangle sourceButtonRec = { 460, 500, 420, 120 };
 
 void home_screen_init(void){
@@ -27,8 +24,11 @@ void home_screen_update(float dt){
     if (UpdateButton(&btnGoToMenu)){
         state_change(SCREEN_MAP);
     }
+    //resetar o save (Tecla R)
+    if (IsKeyPressed(KEY_R)) {
+        progress_reset();
+    }
 }
-
 void home_screen_draw(void){
     ClearBackground((Color){20, 20, 30, 255});
     DrawTexture(titleScreen, 0, 0, WHITE);

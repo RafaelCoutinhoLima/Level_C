@@ -88,3 +88,10 @@ void progress_add_death(void) {
 int progress_get_total_deaths(void) {
     return g_total_deaths;
 }
+void progress_reset(void) {
+    g_max_unlocked_level = 1;
+    g_total_deaths = 0;
+    progress_save();
+    
+    TraceLog(LOG_INFO, "[Progress] O save foi resetado completamente!");
+}

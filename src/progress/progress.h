@@ -22,4 +22,6 @@ void progress_add_death(void);
 //para retornar o valor das mortes
 int progress_get_total_deaths(void);
 
+void progress_reset(void);
+
 #endif
