@@ -70,6 +70,7 @@ void trap_set_reset(TrapSet* set) {
         
         // Reseta todas as traps para o estado ativo
         t->state = TRAP_STATE_ACTIVE;
+        t->active = true;
     }
     
     TraceLog(LOG_INFO, "[TrapSet] Todas as traps foram resetadas");
