@@ -1,4 +1,3 @@
-// src/screen/play_screen.c
 #include "play_screen.h"
 #include "levels/level_loader.h"
 #include "io/input.h"
@@ -62,11 +61,6 @@ void play_screen_update(float dt) {
 
     collision_result_reset(&gCol);
     input_update_player(&gInput);
-
-    // Som de Pulo
-    if (IsKeyPressed(KEY_SPACE) && gPlayer.isOnGround) {
-        audio_play_event(AUDIO_SFX_JUMP);
-    }
 
     player_apply_input(&gPlayer, &gInput, dt);
     physics_update(&gPlayer, &gInput, dt);

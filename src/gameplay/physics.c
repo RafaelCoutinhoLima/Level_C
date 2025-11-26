@@ -1,9 +1,10 @@
 #include "physics.h"
 #include "level.h"     
-#include "io/input.h"  // Necessário para ler input->moveAxis
+#include "io/input.h" 
+#include "io/audio.h" 
 #include <raylib.h>
 #include <raymath.h>
-#include <math.h>      // Para fabsf (float absolute)
+#include <math.h>
 
 // Valores Padrão (Hardcoded para segurança)
 static PhysicsParams gPhysBase = {
@@ -43,6 +44,9 @@ static void try_start_jump(Player* player, const InputState* input){
     if (input->jumpPressed && player->isOnGround) {
         player->velocity.y = -gPhysCurrent.jumpSpeed;
         player->isOnGround = false;
+        
+        audio_play_event(AUDIO_SFX_JUMP);
+
         TraceLog(LOG_DEBUG, "[Physics] jump -> velY=%.1f", player->velocity.y);
     }
 }
