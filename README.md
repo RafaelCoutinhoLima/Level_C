@@ -2,7 +2,6 @@
 
 **"Um remake 2D do 'Level Devil' (mas em C)"**
 
-<img src="resources/readme/gameplay_banner.png" alt=BANER LEVEL C" width="100%"/>
 
 Level C é um jogo de plataforma 2D do gênero *rage* (feito para passar raiva), inspirado no notório **Level Devil**.  
 O objetivo é simples: chegar ao final da fase. A dificuldade é... bom, você vai descobrir.
