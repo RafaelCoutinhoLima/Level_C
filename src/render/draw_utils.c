@@ -87,10 +87,7 @@ void draw_traps(const TrapSet* trapSet){
                 
             //H:One-Way / Atravessável (Azul)
             case TRAP_TYPE_ONEWAY:
-                color = Fade(SKYBLUE, 0.4f);
-                DrawRectangleRec(t->hitbox, color);
-                DrawRectangle(t->hitbox.x, t->hitbox.y, t->hitbox.width, 4, BLUE);
-                DrawText("H", t->hitbox.x + 10, t->hitbox.y + 8, 10, DARKBLUE);
+                DrawRectangle(t->hitbox.x, t->hitbox.y, t->hitbox.width, 6, BLACK);
                 break;
 
             //D:Bloco que Some (Laranja)
