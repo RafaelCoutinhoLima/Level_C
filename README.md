@@ -48,6 +48,7 @@ sudo apt install build-essential git
 
 # Instalar Raylib (já inclui todas as dependências necessárias)
 sudo apt install libraylib-dev
+```
 
 #### 🔸 macOS
 
@@ -55,6 +56,7 @@ Antes de seguir o guia oficial, tente o método mais simples:
 
 ```bash
 brew install raylib
+```
 
 ⚠️ O jogo não foi testado no sistema Mac.
 
