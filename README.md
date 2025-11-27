@@ -28,10 +28,6 @@ Confira o screencast do jogo e veja as mecânicas (e o sofrimento) em ação:
 🎥 **Screencast no YouTube:**  
 👉[LINK do SCREEN CAST](https://youtu.be/BTZFCk2sp9Q)
 
-Ou clique no botão abaixo:
-
-[![Assistir no YouTube](https://youtu.be/BTZFCk2sp9Q)
-
 ---
 
 ## 🛠️ Compilando e Rodando
