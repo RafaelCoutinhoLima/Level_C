@@ -6,7 +6,7 @@
 #include <raymath.h>
 #include <math.h>
 
-// Valores Padrão (Hardcoded para segurança)
+// Valores Padrão 
 static PhysicsParams gPhysBase = {
     .gravity = 1800.0f,
     .jumpSpeed = 520.0f,

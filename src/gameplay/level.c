@@ -1,26 +1,21 @@
-// src/gameplay/level.c
 #include "level.h"
 #include "player.h"
 
 #include <string.h>
 #include <raylib.h>
 
-#include "render/draw_utils.h"     // DrawSprite(...)
-#include "io/assets.h"             // GetAssets(), Assets.rect_platform
-#include "levels/level_loader.h"   // level_loader_from_id(...)
+#include "render/draw_utils.h"     
+#include "io/assets.h"             
+#include "levels/level_loader.h"   
 
 static const float DEFAULT_TILE_SIZE = 32.0f;
 
-/* -----------------------------------------------------
-   Helpers
------------------------------------------------------ */
+//Helpers
 static inline bool in_bounds(const Level* L, int tx, int ty) {
     return (L && tx >= 0 && ty >= 0 && tx < L->width && ty < L->height);
 }
 
-/* -----------------------------------------------------
-   Ciclo de vida
------------------------------------------------------ */
+//Ciclo de vida
 void level_init(Level* level) {
     if (!level) return;
 
@@ -47,9 +42,7 @@ void level_clear(Level* level) {
     TraceLog(LOG_INFO, "[Level] clear");
 }
 
-/* -----------------------------------------------------
-   Consultas
------------------------------------------------------ */
+//Consultas
 bool level_is_tile_solid(const Level* level, int tx, int ty) {
     if (!level) return false;
 
@@ -65,28 +58,16 @@ Rectangle level_tile_bounds(const Level* level, int tx, int ty) {
     return (Rectangle){ tx * s, ty * s, s, s };
 }
 
-/* -----------------------------------------------------
-   Player
------------------------------------------------------ */
+//Player
 void level_reset_player(const Level* level, struct Player* player) {
     if (!level || !player) return;
     player_reset(player, level->spawn);
 }
-
-/* -----------------------------------------------------
-   Desenho (sólidos)
-   - Usa o sprite "platform" vindo de Assets
-   - Se Assets não estiver disponível, desenha fallback
------------------------------------------------------ */
-/* -----------------------------------------------------
-   Carregamento por ID
------------------------------------------------------ */
 bool level_load_by_id(Level* level, int levelId) {
     if (!level) return false;
 
     level->id = levelId;
 
-    // limpa grade/traps antes de carregar
     trap_set_clear(&level->trapSet);
     memset(level->tiles, 0, sizeof(level->tiles));
     level->width  = 0;

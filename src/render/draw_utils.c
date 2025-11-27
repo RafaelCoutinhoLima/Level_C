@@ -41,14 +41,12 @@ void draw_level_tiles (const Level* level){
                 Vector2 pos = { tileRect.x, tileRect.y };
                 DrawTextureRec(A->spritesheet_atlas, A->rect_platform, pos, WHITE);
             } else {
-                // Fallback visual
                 DrawRectangleRec(tileRect, (Color){60,200,80,100});
                 DrawRectangleLinesEx(tileRect, 1.0f, DARKGREEN);
             }
         }
     }
 }
-// Traps (Aqui está a mágica da Trap Falsa)
 void draw_traps(const TrapSet* trapSet){
     if (!trapSet) return;
 
@@ -102,7 +100,6 @@ void draw_player(const Player* player){
     if (!player) return;
 
     Assets* assets = GetAssets();
-    // Caso não consiga carregar a sprite, gera um personagem genérico
     if (assets->player_sheet.id == 0){
         Rectangle bounds = player_get_bounds(player);
         DrawRectangleRec(bounds, (Color){20, 20, 20, 255});

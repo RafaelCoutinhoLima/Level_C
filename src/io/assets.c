@@ -74,7 +74,7 @@ bool assets_init(void) {
         g_assets.map_background = (Texture2D){0};
     }
 
-    //CARREGA A FONTE
+    //CARREGA A FONTE nova sem ser a da raylib padrão
     if (FileExists("assets/font.ttf")) {
         g_assets.gameFont = LoadFontEx("assets/font.ttf", 64, 0, 0);
         SetTextureFilter(g_assets.gameFont.texture, TEXTURE_FILTER_POINT);
@@ -84,7 +84,6 @@ bool assets_init(void) {
         g_assets.gameFont = GetFontDefault();
     }
 
-    // Definição dos Retângulos do Tileset
     g_assets.rect_platform     = (Rectangle){  32, 0, 32, 32 };  
     g_assets.rect_trap_spike   = (Rectangle){ 64, 0, 32, 32 };  
     g_assets.rect_goal_door    = (Rectangle){ 96, 0, 32, 32 };  

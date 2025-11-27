@@ -1,11 +1,7 @@
 #include "input.h"
 #include <raylib.h>
 
-// Mantemos apenas leitura de teclado por enquanto.
-// Mouse pode ser adicionado depois sem quebrar a API.
-
 bool input_init(void) {
-    // Nada assíncrono aqui, só garantimos estado inicial válido se preciso.
     return true;
 }
 
@@ -24,6 +20,5 @@ void input_update_player(InputState* input) {
     input->jumpHeld    = jumpHeld;
     input->jumpPressed = jumpPressed;
 
-    // Caso futuramente queira acelerar/andar devagar:
     input->runHeld = (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT));
 }

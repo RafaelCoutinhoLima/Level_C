@@ -73,7 +73,6 @@ void play_screen_init(void) {
 }
 
 void play_screen_update(float dt) {
-    // Se já alcançou o goal, só conta o timer
     if (gGoalReached) {
         gGoalTimer += dt;
         particle_system_update(&gParticles, dt);
@@ -122,17 +121,17 @@ void play_screen_update(float dt) {
         
         gGoalReached = true;
         gGoalTimer = 0.0f;
-        return;  // ← SÓ ISSO! Não chama state_change aqui
+        return; 
     }
 
     if (gPlayer.isOnGround && fabsf(gPlayer.velocity.x) > 50.0f) {
         static float dustTimer = 0.0f;
         dustTimer += dt;
         
-        if (dustTimer >= 0.1f) {  // A cada 0.1 segundos
+        if (dustTimer >= 0.1f) {  
             Vector2 dustPos = (Vector2){
                 gPlayer.hitbox.x + gPlayer.hitbox.width / 2,
-                gPlayer.hitbox.y + gPlayer.hitbox.height  // Embaixo do player
+                gPlayer.hitbox.y + gPlayer.hitbox.height  
             };
             particle_emit_dust(&gParticles, dustPos);
             dustTimer = 0.0f;

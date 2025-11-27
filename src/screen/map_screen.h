@@ -6,17 +6,17 @@
 
 #define  MAX_MAP_NODES 10
 typedef enum {
-    NODE_LOCKED,  //bloquear fase
-    NODE_AVAILABLE,//fase disponivel
-    NODE_COMPLETED,//fase concluido 
+    NODE_LOCKED,  
+    NODE_AVAILABLE,
+    NODE_COMPLETED,
 }NodeState;
 
 typedef struct {
     int levelId;//ID que vai ser passado para o level_loader
     Vector2 position;//posição x e y 
     NodeState state;//estado atual
-    bool isHovered;//se o mouse ta em cima
-    float animScale; //a animação pular
+    bool isHovered;
+    float animScale; 
 }LevelNode;
 GameState map_screen_state(void);
 #endif

@@ -9,7 +9,6 @@ static int g_total_deaths = 0;          //Contador de mortes
 static const char *SAVE_FILE = "savegame.dat";
 
 void progress_init(void) {
-    // Tenta carregar o save do arquivo
     FILE *file = fopen(SAVE_FILE, "r");
     
     if (file != NULL) {
@@ -61,12 +60,10 @@ int progress_get_max_unlocked(void) {
     return g_max_unlocked_level;
 }
 
-// Chama isso quando tocar no PORTAL
 void progress_complete_current_level(void) {
-    // Só avança se eu completei a minha fase de "anterior"
+    // Só avança se eu completei a minha fase de anterior
     if (g_current_level_id == g_max_unlocked_level) {
         g_max_unlocked_level++;
-        // Trava no máximo
         if (g_max_unlocked_level > MAX_LEVELS_SUPPORTED) {
             g_max_unlocked_level = MAX_LEVELS_SUPPORTED;
         }
@@ -76,7 +73,6 @@ void progress_complete_current_level(void) {
 }
 
 bool progress_is_level_completed(int level_id) {
-    // Se o nível perguntado for menor que o meu máximo, eu já completei
     return level_id < g_max_unlocked_level;
 }
 

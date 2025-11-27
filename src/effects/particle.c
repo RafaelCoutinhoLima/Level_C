@@ -37,7 +37,7 @@ static void particle_add(ParticleSystem* ps, Particle p) {
     }
     
     *newParticle = p;
-    newParticle->next = ps->head;  // ← Insere no início da lista
+    newParticle->next = ps->head;  //Insere no início da lista
     ps->head = newParticle;
     ps->count++;
 }
@@ -55,11 +55,10 @@ void particle_system_update(ParticleSystem* ps, float dt) {
         p->lifetime -= dt;
         p->position.x += p->velocity.x * dt;
         p->position.y += p->velocity.y * dt;
-        p->velocity.y += 500.0f * dt;  // Gravidade
+        p->velocity.y += 500.0f * dt; 
         
-        // Remove se morreu
         if (p->lifetime <= 0.0f) {
-            *current = p->next;  // ← Remove da lista encadeada
+            *current = p->next;  //Remove da lista encadeada
             free(p);
             ps->count--;
         } else {
@@ -81,11 +80,11 @@ void particle_system_draw(const ParticleSystem* ps) {
         
         DrawCircleV(current->position, current->size, c);
         
-        current = current->next;  // ← Percorre a lista
+        current = current->next;  
     }
 }
 
-// Emite explosão (quando player morre)
+// Emite explosão 
 void particle_emit_explosion(ParticleSystem* ps, Vector2 position, int count) {
     if (!ps) return;
     
@@ -118,7 +117,7 @@ void particle_emit_explosion(ParticleSystem* ps, Vector2 position, int count) {
     TraceLog(LOG_INFO, "[ParticleSystem] Explosão ciano emitida (%d partículas)", count);
 }
 
-// Emite poeira (quando player anda)
+// Emite poeira 
 void particle_emit_dust(ParticleSystem* ps, Vector2 position) {
     if (!ps) return;
     

@@ -46,7 +46,7 @@ static void do_state_change(void){
     }
     if (g_current_state!=NULL && g_current_state->unload!=NULL){
         g_current_state->unload();
-        //faz o unload da tela atual que é a "passada"
+        //faz o unload da tela atual que é a passada
     }
     g_current_state_id=g_next_state_id;
     g_current_state=&g_states[g_current_state_id];
@@ -66,7 +66,6 @@ static void do_state_change(void){
 void state_update(float dt){
     //antes de dar o update chamo para ver se vai trocar de tela
     do_state_change();
-    //fazer o update agora g_current já ta na tela certa
     if (g_current_state!=NULL && g_current_state->update!=NULL){
         g_current_state->update(dt);
     }
@@ -78,7 +77,6 @@ void state_draw(void){
     }
 }
 void state_shutdown(void){
-    //descarrega a ultima tela 
     if (g_current_state!=NULL && g_current_state->unload !=NULL){
         g_current_state->unload();
     }

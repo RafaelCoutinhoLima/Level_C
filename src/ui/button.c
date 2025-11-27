@@ -1,4 +1,3 @@
-// src/ui/button.c
 #include "button.h"
 #include <string.h>
 #include <raylib.h>

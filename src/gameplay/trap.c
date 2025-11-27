@@ -52,7 +52,7 @@ Trap* trap_set_get_mutable(TrapSet* set, size_t index){
     }
     return &set->traps[index];
 }
-// Atualiza timers e estados (ex: faz o bloco sumir depois de um tempo)
+// Atualiza timers e estados 
 void trap_set_update(TrapSet* set) {
     if (!set) return;
 
