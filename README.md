@@ -26,11 +26,11 @@ Projeto desenvolvido por:
 Confira o screencast do jogo e veja as mecânicas (e o sofrimento) em ação:
 
 🎥 **Screencast no YouTube:**  
-👉 https://www.youtube.com/watch?v=lugar de botar deposi de gravar
+👉[LINK do SCREEN CAST](https://github.com/RafaelCoutinhoLima/Level_C.git)
 
 Ou clique no botão abaixo:
 
-[![Assistir no YouTube](https://www.youtube.com/watch?v=lugar de botar deposi de gravar)
+[![Assistir no YouTube]((https://github.com/RafaelCoutinhoLima/Level_C.git))
 
 ---
 
